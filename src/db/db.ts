@@ -1,0 +1,21 @@
+/**
+ * Universidad de La Laguna
+ * Asignatura: Desarrollo de Sistemas Informáticos
+ * Decimo tercera práctica de la asignatura DSI
+ * Realizada por:
+ *  > Antonio Ramos Castilla (alu0101480367@ull.edu.es)
+ *  > Ithaisa Morales Arbelo (alu0101482194@ull.edu.es)
+ *  > Omar Suárez Doro (alu0101483474@ull.edu.es)
+ */
+import { connect } from 'mongoose';
+
+// Connect to Database
+export let iniciarDB = () => {
+  // TODO: Añadir proceso que ejecute en segundo plano el la base de datos si da tiempo
+  connect('mongodb://127.0.0.1:27017/CardsApp').then(() => {
+    console.log('Connected to the database');
+  }).catch(() => {
+    console.log('Something went wrong when conecting to the database');
+    process.exit(-1);
+  });
+}
