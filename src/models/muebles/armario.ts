@@ -28,7 +28,15 @@ const ArmarioSchema = new Schema<ArmarioDocumentInterface>({
   },
   puertas_: {
     type: Number,
-    required: true
+    required: true,
+    validate: (value: number) => {
+      if (value % 1 !== 0) {
+        throw new Error('Un armario no puede tener un número decimal de puertas.');
+      }
+      if (value < 0) {
+        throw new Error('Un armario no puede tener puertas negativas.');
+      }
+    },
   }
 });
 
