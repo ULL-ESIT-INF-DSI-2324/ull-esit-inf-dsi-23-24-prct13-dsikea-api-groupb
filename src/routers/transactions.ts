@@ -72,7 +72,10 @@ transaccionRouter.post('/transactions', async (req, res) => {
     let idPersona = await personaModel.findOne({ id_: req.body.persona_ });
     let idMueble = await muebleModel.findOne({ id_: req.body.mueble_ });
     let model = null;
-    let changedObj = {...req.body, idPersona: idPersona?._id, idMueble: idMueble?._id};
+    let changedObj = {...req.body};
+    changedObj.persona_ = idPersona;
+    changedObj.mueble_ = idMueble;
+    console.log(changedObj);
     switch (req.body.tipo_) {
       case 'devolucion':
         model = new devolucionModel(changedObj);
