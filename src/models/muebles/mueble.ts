@@ -7,20 +7,27 @@
  *  > Ithaisa Morales Arbelo (alu0101482194@ull.edu.es)
  *  > Omar Suárez Doro (alu0101483474@ull.edu.es)
  */
-import { model, Schema } from 'mongoose';
-import { MuebleDocumentInterface } from './mueble.js'
+import { Document, model, Schema } from 'mongoose';
+import { Dimension } from '../../entities/Muebles/Mueble.js';
 
 /**
  * Interfaz que representa un documento de la colección de Muebles
  */
-export interface ArmarioDocumentInterface extends MuebleDocumentInterface {
-  cajones_:
+export interface MuebleDocumentInterface extends Document {
+  id_: number,
+  tipo_: string,
+  nombre_: string,
+  material_: string,
+  descripcion_: string,
+  dimensiones_: Dimension,
+  color_: string,
+  cantidad_: number
 }
 
 /**
  * Esquema de la colección de Muebles
  */
-const SillaSchema = new Schema<ArmarioDocumentInterface>({
+const MuebleSchema = new Schema<MuebleDocumentInterface>({
   id_: {
     type: Number,
     unique: true,
@@ -54,25 +61,22 @@ const SillaSchema = new Schema<ArmarioDocumentInterface>({
   },
   cantidad_: {
     type: Number,
-    required: true
+  },
+  color_: {
+    type: String,
+    required: true,
+    trim: true,
+    lowercase: true
   },
   tipo_: {
     type: String,
     required: true,
     trim: true,
     lowercase: true
-  },
-  respaldo_: {
-    type: Boolean,
-    required: true
-  },
-  reposabrazos_: {
-    type: Boolean,
-    required: true
   }
 });
 
 /**
  * Exportación del modelo de la colección de Muebles
  */
-export const sillaModel = model<SillaDocumentInterface>('Sillas', SillaSchema);
+export const muebleModel = model<MuebleDocumentInterface>('Mueble', MuebleSchema);
