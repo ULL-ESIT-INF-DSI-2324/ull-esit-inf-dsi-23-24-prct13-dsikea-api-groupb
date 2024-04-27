@@ -28,19 +28,43 @@ const TransaccionSchema = new Schema<TransaccionDocumentInterface>({
     type: Number,
     unique: true,
     required: true,
+    validate: (value: number) => {
+      if (value < 0) {
+        throw new Error('El id de una transacción no puede ser negativo.');
+      }
+      if (value % 1 !== 0) {
+        throw new Error('El id de una transacción no puede ser un número decimal.');
+      }
+    }
   },
   fecha_: {
     type: Date,
     required: true,
+    validate: (value: Date) => {
+      if (value > new Date()) {
+        throw new Error('La fecha de una transacción no puede ser futura.');
+      }
+      if (value < new Date('2020-01-01')) {
+        throw new Error('La fecha de una transacción no puede ser anterior a 2020.');
+      }
+      if (value === new Date('Invalid Date')) {
+        throw new Error('La fecha de una transacción no puede ser inválida.');
+      }    
+    }
   },
   importe_: {
     type: Number,
     required: true,
+    validate: (value: number) => {
+      if (value < 0) {
+        throw new Error('El importe de una transacción no puede ser negativo.');
+      }
+    }
   },
   mueble_: {
     type: Schema.Types.ObjectId,
     ref: 'Muebles',
-    required: true,
+    required: true
   },
   persona_: {
     type: Schema.Types.ObjectId,

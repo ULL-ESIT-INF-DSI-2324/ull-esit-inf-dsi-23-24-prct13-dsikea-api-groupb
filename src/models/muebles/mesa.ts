@@ -28,7 +28,16 @@ const MesasSchema = new Schema<MesaDocumentInterface>({
   },
   sillas_: {
     type: Number,
-    required: true
+    required: true,
+    validate: (value: number) => {
+      if (value % 1 !== 0) {
+        throw new Error('Una mesa no puede tener un número decimal de sillas.');
+      }
+      if (value < 0) {
+        throw new Error('Una mesa no puede tener un número negativo de sillas.');
+      }
+    },
+
   }
 });
 
