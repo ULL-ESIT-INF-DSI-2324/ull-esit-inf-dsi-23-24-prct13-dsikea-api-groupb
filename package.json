@@ -30,11 +30,12 @@
   "type": "module",
   "scripts": {
     "start": "tsc-watch --onSuccess \"node dist index.js\"",
-    "test": "mocha --exit",
+    "test": "env-cmd -f ./config/test.env mocha --exit",
     "coverage": "c8 npm test && c8 report --reporter=lcov",
     "doc": "typedoc",
     "server": "tsc && node dist/ArchivosNuevos/serverExpress.js &",
-    "git": "git add . && git commit -m \"Updates\" && git push"
+    "git": "git add . && git commit -m \"Updates\" && git push",
+    "dev": "tsc-watch --onSuccess \"env-cmd -f ./config/dev.env node dist/index.js\""
   },
   "devDependencies": {
     "@types/chai": "^4.3.12",
@@ -48,6 +49,7 @@
     "@typescript-eslint/parser": "^7.1.1",
     "c8": "^9.1.0",
     "chai": "^5.1.0",
+    "env-cmd": "^10.1.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "mocha": "^10.3.0",

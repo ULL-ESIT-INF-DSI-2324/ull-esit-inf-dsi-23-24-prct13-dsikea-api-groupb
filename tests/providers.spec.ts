@@ -103,4 +103,207 @@ describe('POST /providers', () => {
     expect(proveedorCreado!.contacto_).to.equal(678901237);
     expect(proveedorCreado!.direccion_).to.equal('Calle Falsa,12,4,10');
   });
+
+  it('Debería guardar un proveedor en la base de datos', async () => {
+    const res = await request(app)
+      .post('/providers')
+      .send({
+        id_: "22222222A",
+        nombre_: 'Jose',
+        contacto_: 678901238,
+        direccion_: 'Calle Falsa,13,5,11'
+      });
+    expect(res.status).to.equal(200);
+    expect(res.body).to.have.property('_id');
+    expect(res.body).to.have.property('nombre_', 'Jose');
+    expect(res.body).to.have.property('contacto_', 678901238);
+    expect(res.body).to.have.property('direccion_', 'Calle Falsa,13,5,11');
+
+    const proveedorCreado = await proveedorModel.findById(res.body._id);
+    expect(proveedorCreado).to.not.be.null;
+    expect(proveedorCreado!.nombre_).to.equal('Jose');
+    expect(proveedorCreado!.contacto_).to.equal(678901238);
+    expect(proveedorCreado!.direccion_).to.equal('Calle Falsa,13,5,11');
+  });
+  it('Debería retornar un error 500 si falta el nombre', async () => {
+    const res = await request(app)
+      .post('/providers')
+      .send({
+        id_: "79097085A",
+        contacto_: 678901238,
+        direccion_: 'Calle Falsa,13,5,11'
+      });
+    expect(res.status).to.equal(500);
+    expect(res.body).to.include({
+      msg: 'Error al guardar el proveedor'
+    });
+  });
+
+  it('Debería retornar un error 500 si falta el contacto', async () => {
+    const res = await request(app)
+      .post('/providers')
+      .send({
+        id_: "79097086A",
+        nombre_: 'Jose',
+        direccion_: 'Calle Falsa,14,6,12'
+      });
+    expect(res.status).to.equal(500);
+    expect(res.body).to.include({
+      msg: 'Error al guardar el proveedor'
+    });
+  });
+});
+
+
+describe('PATCH /providers', () => {
+  it('Debería actualizar un proveedor en la base de datos (query string)', async () => {
+    const res = await request(app)
+      .patch('/providers')
+      .send({
+        id_: "22222222A",
+        nombre_: 'Jose Antonio',
+        contacto_: 678901238,
+        direccion_: 'Calle Falsa,12,4,10'
+      });
+    expect(res.status).to.equal(200);
+    expect(res.body).to.have.property('_id');
+    expect(res.body).to.have.property('nombre_', 'Jose Antonio');
+    expect(res.body).to.have.property('contacto_', 678901238);
+    expect(res.body).to.have.property('direccion_', 'Calle Falsa,12,4,10');
+
+    const proveedorActualizado = await proveedorModel.findById(res.body._id);
+    expect(proveedorActualizado).to.not.be.null;
+    expect(proveedorActualizado!.nombre_).to.equal('Jose Antonio');
+    expect(proveedorActualizado!.contacto_).to.equal(678901238);
+    expect(proveedorActualizado!.direccion_).to.equal('Calle Falsa,12,4,10');
+  });
+
+  it('Debería retornar un error 404 si el proveedor no existe (query string)', async () => {
+    const res = await request(app)
+      .patch('/providers')
+      .send({
+        id_: "99999999B",
+        nombre_: 'Jose Antonio',
+        contacto_: 678901238,
+        direccion_: 'Calle Falsa,12,4,10'
+      });
+    expect(res.status).to.equal(404);
+    expect(res.body).to.include({
+      msg: 'No se encontró el proveedor'
+    });
+  });
+
+  it('Debería retornar un error 500 si falta el nombre (query string)', async () => {
+    const res = await request(app)
+      .patch('/providers')
+      .send({
+        id_: "79097084A",
+        contacto_: 678901238,
+        direccion_: 'Calle Falsa,12,4,10'
+      });
+    expect(res.status).to.equal(500);
+    expect(res.body).to.include({
+      msg: 'Error al actualizar el proveedor'
+    });
+  });
+
+  it('Debería retornar un error 400 si falta el contacto (query string)', async () => {
+    const res = await request(app)
+      .patch('/providers')
+      .send({
+        id_: "79097084A",
+        nombre_: 'Jose Antonio',
+        direccion_: 'Calle Falsa,12,4,10'
+      });
+    expect(res.status).to.equal(500);
+    expect(res.body).to.include({
+      msg: 'Error al actualizar el proveedor'
+    });
+  });
+
+  it('Debería actualizar un proveedor en la base de datos (id dinámica)', async () => {
+    const res = await request(app)
+      .patch('/providers/79097084A')
+      .send({
+        nombre_: 'Mara',
+        contacto_: 678901238,
+        direccion_: 'Calle Falsa,12,4,10'
+      });
+    expect(res.status).to.equal(200);
+    expect(res.body).to.have.property('_id');
+    expect(res.body).to.have.property('nombre_', 'Mara');
+    expect(res.body).to.have.property('contacto_', 678901238);
+    expect(res.body).to.have.property('direccion_', 'Calle Falsa,12,4,10');
+
+    const proveedorActualizado = await proveedorModel.findById(res.body._id);
+    expect(proveedorActualizado).to.not.be.null;
+    expect(proveedorActualizado!.nombre_).to.equal('Mara');
+    expect(proveedorActualizado!.contacto_).to.equal(678901238);
+    expect(proveedorActualizado!.direccion_).to.equal('Calle Falsa,12,4,10');
+  });
+
+  it('Debería retornar un error 404 si el proveedor no existe (id dinámica)', async () => {
+    const res = await request(app)
+      .patch('/providers/99999999B')
+      .send({
+        nombre_: 'Jose Antonio',
+        contacto_: 678901238,
+        direccion_: 'Calle Falsa,12,4,10'
+      });
+    expect(res.status).to.equal(404);
+    expect(res.body).to.include({
+      msg: 'No se encontró el proveedor'
+    });
+  });
+});
+
+
+describe('DELETE /providers', () => {
+  it('Debería borrar un proveedor de la base de datos (query string)', async () => {
+    const res = await request(app)
+      .delete('/providers')
+      .send({
+        id_: "79097084A"
+      });
+    expect(res.status).to.equal(200);
+    expect(res.body).to.include({
+      msg: 'Proveedor eliminado'
+    });
+
+    const proveedorBorrado = await proveedorModel.findById("79097084A");
+    expect(proveedorBorrado).to.be.null;
+  });
+
+  it('Debería retornar un error 404 si el proveedor no existe (query string)', async () => {
+    const res = await request(app)
+      .delete('/providers')
+      .send({
+        id_: "99999999B"
+      });
+    expect(res.status).to.equal(404);
+    expect(res.body).to.include({
+      msg: 'No se encontró el proveedor'
+    });
+  });
+
+  it('Debería borrar un proveedor de la base de datos (id dinámica)', async () => {
+    const res = await request(app)
+      .delete('/providers/79097083A');
+    expect(res.status).to.equal(200);
+    expect(res.body).to.include({
+      msg: 'Proveedor eliminado'
+    });
+
+    const proveedorBorrado = await proveedorModel.findById("79097083A");
+    expect(proveedorBorrado).to.be.null;
+  });
+
+  it('Debería retornar un error 404 si el proveedor no existe (id dinámica)', async () => {
+    const res = await request(app)
+      .delete('/providers/99999999B');
+    expect(res.status).to.equal(404);
+    expect(res.body).to.include({
+      msg: 'No se encontró el proveedor'
+    });
+  });
 });
