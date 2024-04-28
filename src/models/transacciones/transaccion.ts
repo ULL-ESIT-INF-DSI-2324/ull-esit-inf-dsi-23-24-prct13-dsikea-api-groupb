@@ -14,9 +14,13 @@ import { Document, model, Schema } from 'mongoose';
  */
 export interface TransaccionDocumentInterface extends Document {
   id_: number,
-  fecha_: Date,
+  fechainicio_: Date,
+  fechafin_: Date,
   importe_: number,
-  mueble_: Schema.Types.ObjectId,
+  muebles_: [{
+    muebleId: { type: Schema.Types.ObjectId, required: true },
+    cantidad: { type: Number, required: true }
+  }],
   persona_: Schema.Types.ObjectId,
 }
 
@@ -37,7 +41,7 @@ const TransaccionSchema = new Schema<TransaccionDocumentInterface>({
       }
     }
   },
-  fecha_: {
+  fechainicio_: {
     type: Date,
     required: true,
     validate: (value: Date) => {
@@ -52,18 +56,34 @@ const TransaccionSchema = new Schema<TransaccionDocumentInterface>({
       }    
     }
   },
+  fechafin_: {
+    type: Date,
+    required: true,
+    validate: (value: Date) => {
+      if (value > new Date()) {
+        throw new Error('La fecha de una transacción no puede ser futura.');
+      }
+      if (value < new Date('2020-01-01')) {
+        throw new Error('La fecha de una transacción no puede ser anterior a 2020.');
+      }
+      if (value === new Date('Invalid Date')) {
+        throw new Error('La fecha de una transacción no puede ser inválida.');
+      }
+    }
+  },
   importe_: {
     type: Number,
-    required: true,
     validate: (value: number) => {
       if (value < 0) {
         throw new Error('El importe de una transacción no puede ser negativo.');
       }
     }
   },
-  mueble_: {
-    type: Schema.Types.ObjectId,
-    ref: 'Muebles',
+  muebles_: {
+    type: [{
+      muebleId: { type: Schema.Types.ObjectId, required: true },
+      cantidad: { type: Number, required: true }
+    }],
     required: true
   },
   persona_: {

@@ -13,7 +13,7 @@ import { Document, model, Schema } from 'mongoose';
  * Interfaz que representa un documento de la colección de Personas
  */
 export interface PersonaDocumentInterface extends Document {
-  id_: number,
+  id_: string,
   nombre_: string,
   contacto_: number,
   direccion_: string
@@ -24,15 +24,18 @@ export interface PersonaDocumentInterface extends Document {
  */
 const PersonaSchema = new Schema<PersonaDocumentInterface>({
   id_: {
-    type: Number,
+    type: String,
     unique: true,
     required: true,
-    validate: (value: number) => {
-      if (value < 0) {
-        throw new Error('El id de una persona no puede ser negativo.');
+    validate: (value: string) => {
+      if (value.length === 0) {
+        throw new Error('El ID de una persona no puede ser vacío.');
       }
-      if (value % 1 !== 0) {
-        throw new Error('El id de una persona no puede ser un número decimal.');
+      if (value.length !== 9) {
+        throw new Error('El ID de una persona debe tener 9 caracteres.');
+      }
+      if (!/^\d{8}\w{1}$/.test(value)) {
+        throw new Error('El ID de una persona debe tener un formato válido: [8 dígitos][1 letras mayúsculas].');
       }
     }
   },
@@ -76,7 +79,7 @@ const PersonaSchema = new Schema<PersonaDocumentInterface>({
       if (value.length === 0) {
         throw new Error('La dirección de una persona no puede ser vacía.');
       }
-      if (!/^[a-zA-Z0-9\s]+,[0-9]+(,[0-9]+*){0,2}$/.test(value)) {
+      if (!/^[a-zA-Z0-9\s]+,[0-9]+(,[0-9]*){0,2}$/.test(value)) {
         throw new Error('La dirección de una persona debe tener un formato válido: [nombre de la calle],[número de la casa], [piso], [puerta].');
       }
     }

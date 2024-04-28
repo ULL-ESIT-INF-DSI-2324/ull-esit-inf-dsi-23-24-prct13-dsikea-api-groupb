@@ -25,7 +25,6 @@ export const furnitureRouter = Express.Router();
  */
 furnitureRouter.get('/furnitures', async (req, res) => {
   req.query = { ...req.query };
-  // console.log(req.query);
   try {
     let mueblesEncontrados: MuebleDocumentInterface[] = [];
     for (const model of models) {
@@ -69,7 +68,23 @@ furnitureRouter.get('/furnitures/:id', async (req, res) => {
  */
 furnitureRouter.post('/furnitures', async (req, res) => {
   try {
+    // Búsqueda en los modelos, y en caso de encontrar el mueble,
+    // se actualiza la cantidad en vez de crear un nuevo mueble
+    for (const model of models) {
+      let result = await model.find({ id_: req.body.id_ });
+      if (result.length > 0) {
+        let response = await model.findOneAndUpdate(
+          { _id: result._id}, 
+          {cantidad_: result.cantidad_ += req.body.cantidad_}, 
+          {new: true, runValidators: true}
+        );
+        res.status(200).send(response);
+        return;
+      }
+    }
     let model = null;
+    let customObj = { ...req.body };
+    if (!req.body.cantidad_) { customObj.cantidad_ = 1; }
     switch (req.body.tipo_) {
       case 'silla':
         model = new sillaModel(req.body);
@@ -144,8 +159,21 @@ furnitureRouter.delete('/furnitures', async (req, res) => {
   req.query = { ...req.query };
   try {
     let muebleEliminado = null;
-    for (const model of models) {
-      muebleEliminado = await model.findOneAndDelete(req.query);
+    for (let model of models) {
+      // Si la cantidad es especificada en el cuerpo de la petición, se restará de la cantidad actual
+      // en caso de que la cantidad sea mayor a la actual, se eliminará el mueble.
+      // En caso de no especificarse, se eliminará el mueble
+      let result = await model.findOne({id_: req.query.id_});
+      if (!result) { continue; }
+      if (req.body.cantidad_ === undefined || result.cantidad_ < req.body.cantidad_) {
+        muebleEliminado = await model.findOneAndDelete(req.query);
+      } else {
+        muebleEliminado = await model.findOneAndUpdate(
+          { _id: result._id}, 
+          {cantidad_: result.cantidad_ -= +req.body.cantidad_}, 
+          {new: true, runValidators: true}
+        );
+      }
       if (muebleEliminado !== null) { break; }
     }
     let condition: boolean = muebleEliminado === null;
@@ -165,7 +193,17 @@ furnitureRouter.delete('/furnitures/:id', async (req, res) => {
   try {
     let muebleEliminado = null;
     for (const model of models) {
-      muebleEliminado = await model.findOneAndDelete({ id_: req.params.id });
+      let result = await model.findOne({id_:req.params.id});
+      if (!result) { continue; }
+      if (req.body.cantidad_ === undefined || result.cantidad_ < req.body.cantidad_) {
+        muebleEliminado = await model.findOneAndDelete({id_:req.params.id});
+      } else {
+        muebleEliminado = await model.findOneAndUpdate(
+          { _id: result._id}, 
+          {cantidad_: result.cantidad_ -= +req.body.cantidad_}, 
+          {new: true, runValidators: true}
+        );
+      }
       if (muebleEliminado !== null) { break; }
     }
     let condition: boolean = muebleEliminado === null;

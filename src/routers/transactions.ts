@@ -13,10 +13,12 @@ import { devolucionModel } from '../models/transacciones/devolucion.js';
 import { ventaModel } from '../models/transacciones/venta.js';
 import { muebleModel } from '../models/muebles/mueble.js';
 import { personaModel } from '../models/personas/persona.js';
+import { compraModel } from '../models/transacciones/compra.js'
 
 // Declaración del router
 export const transaccionRouter = Express.Router();
-let models: any[] = [devolucionModel, ventaModel, transaccionModel];
+let models: any[] = [devolucionModel, ventaModel, transaccionModel,];
+let modelsPost: any[] = [compraModel, ventaModel];
 
 /**
  * Busca una transacción en la base de datos haciendo uso de la QueryString
@@ -69,23 +71,40 @@ transaccionRouter.get('/transactions/:id', async (req, res) => {
  */
 transaccionRouter.post('/transactions', async (req, res) => {
   try {
+    // TODO: Validar que la persona y el mueble existen con los validadores de mongoose
+    // Parse de los datos
     let idPersona = await personaModel.findOne({ id_: req.body.persona_ });
-    let idMueble = await muebleModel.findOne({ id_: req.body.mueble_ });
-    let model = null;
-    let changedObj = {...req.body};
+    let importeTotal: number = 0;
+    let mueblesCambiados = [];
+    for (const mueble of req.body.muebles_) {
+      let idMueble = await muebleModel.findOne({ id_: mueble.muebleId });
+      if (!idMueble) { continue; }
+      // Si es una venta, debe haber suficientes muebles en stock  ----> Esto debería estar en el validador de mongoose ¡Arreglar!
+      if (mueble.tipo_ === 'venta' && idMueble.cantidad_ < mueble.cantidad) {
+        throw new Error('No hay suficientes muebles en stock');
+      }
+      // Actualización de la cantidad de muebles, importe total y array de muebles cambiados
+      await muebleModel.findOneAndUpdate({ _id: mueble.muebleId._id }, { cantidad_: idMueble.cantidad_ - mueble.cantidad });
+      importeTotal += idMueble!.precio_ * mueble.cantidad;
+      mueblesCambiados.push({ muebleId: idMueble?._id, cantidad: mueble.cantidad });
+    }
+    // Modificación del Body Original
+    let changedObj = { ...req.body };
     changedObj.persona_ = idPersona;
-    changedObj.mueble_ = idMueble;
+    changedObj.importe_ = importeTotal;
+    changedObj.muebles_ = mueblesCambiados;
+    // En función del tipo de transacción se crea un modelo u otro
+    let model = null;
     console.log(changedObj);
     switch (req.body.tipo_) {
-      case 'devolucion':
-        model = new devolucionModel(changedObj);
+      case 'compra':
+        model = new compraModel(changedObj);
         break;
       case 'venta':
         model = new ventaModel(changedObj);
         break;
       default:
-        model = new transaccionModel(changedObj);
-        break;
+        throw new Error('Tipo de transacción no soportado');
     }
     await model.save();
     res.send(model);
@@ -106,7 +125,30 @@ transaccionRouter.patch('/transactions', async (req, res) => {
     let transaccionesActualizadas: TransaccionDocumentInterface[] = [];
     for (const model of models) {
       let result = await model.updateMany(req.query, req.query.update);
-      if (result) { transaccionesActualizadas.push(result); }
+      if (!result) { continue; }
+      transaccionesActualizadas.push(result);
+      // DE ESTA PARTE PARA ABAJO, XD NO ESTÁ IMPLEMENTADO EN REALIDAD, MUY XD TODO: PROBAR QUE SE APLICAN LOS STOCKS SI SE AUMENTA O DISMINUYE
+      // CANTIDAD DE MUEBLES
+      // Iteramos por los muebles de la transacción junto a sus cantidades
+      for (const mueble of result.muebles_) {
+        let idMueble = await muebleModel.findOne({ _id: mueble.muebleId });
+        if (!idMueble) { continue; }
+        await muebleModel.findOneAndUpdate({ _id: mueble.muebleId }, { cantidad_: idMueble.cantidad_ + mueble.cantidad });
+      }
+      let importeTotal: number = 0;
+      let mueblesCambiados = [];
+      for (const mueble of req.body.muebles_) {
+        let idMueble = await muebleModel.findOne({ id_: mueble.muebleId });
+        if (!idMueble) { continue; }
+        if (mueble.tipo_ === 'venta' && idMueble.cantidad_ < mueble.cantidad) {
+          throw new Error('No hay suficientes muebles en stock');
+        }
+        await muebleModel.findOneAndUpdate({ _id: mueble.muebleId._id }, { cantidad_: idMueble.cantidad_ - mueble.cantidad });
+        importeTotal += idMueble!.precio_ * mueble.cantidad;
+        mueblesCambiados.push({ muebleId: idMueble?._id, cantidad: mueble.cantidad });
+      }
+      transaccionesActualizadas.push(result);
+
     }
     res.status(200).send(transaccionesActualizadas);
   } catch (error) {
@@ -124,8 +166,30 @@ transaccionRouter.patch('/transactions/:id', async (req, res) => {
   try {
     let transaccionesActualizadas: TransaccionDocumentInterface[] = [];
     for (const model of models) {
+      // Actualización de la transacción
       let result = await model.findOneAndUpdate({ id_: req.params.id }, req.body, { new: true, runValidators: true });
-      if (result) { transaccionesActualizadas.push(result); }
+      if (!result) { continue; }
+      // DE ESTA PARTE PARA ABAJO, XD NO ESTÁ IMPLEMENTADO EN REALIDAD, MUY XD TODO: PROBAR QUE SE APLICAN LOS STOCKS SI SE AUMENTA O DISMINUYE
+      // CANTIDAD DE MUEBLES
+      // Iteramos por los muebles de la transacción junto a sus cantidades
+      for (const mueble of result.muebles_) {
+        let idMueble = await muebleModel.findOne({ _id: mueble.muebleId });
+        if (!idMueble) { continue; }
+        await muebleModel.findOneAndUpdate({ _id: mueble.muebleId }, { cantidad_: idMueble.cantidad_ + mueble.cantidad });
+      }
+      let importeTotal: number = 0;
+      let mueblesCambiados = [];
+      for (const mueble of req.body.muebles_) {
+        let idMueble = await muebleModel.findOne({ id_: mueble.muebleId });
+        if (!idMueble) { continue; }
+        if (mueble.tipo_ === 'venta' && idMueble.cantidad_ < mueble.cantidad) {
+          throw new Error('No hay suficientes muebles en stock');
+        }
+        await muebleModel.findOneAndUpdate({ _id: mueble.muebleId._id }, { cantidad_: idMueble.cantidad_ - mueble.cantidad });
+        importeTotal += idMueble!.precio_ * mueble.cantidad;
+        mueblesCambiados.push({ muebleId: idMueble?._id, cantidad: mueble.cantidad });
+      }
+      transaccionesActualizadas.push(result);
     }
     res.status(200).send(transaccionesActualizadas);
   } catch (error) {
@@ -146,7 +210,20 @@ transaccionRouter.delete('/transactions', async (req, res) => {
     let transaccionesEliminadas: TransaccionDocumentInterface[] = [];
     for (const model of models) {
       let result = await model.deleteMany(req.query);
-      if (result) { transaccionesEliminadas.push(result); }
+      if (!result) { continue }
+      // Iteramos sobre los muebles de la transacción que eliminamos para devolverlos al stock
+      for (const mueble of result.muebles_) {
+        let idMueble = await muebleModel.findOne({ _id: mueble.muebleId });
+        if (!idMueble) { continue; }
+        // Si la transacción era una venta, devolvemos los muebles al stock
+        if (mueble.tipo_ === 'venta') {
+          await muebleModel.findOneAndUpdate({ _id: mueble.muebleId }, { cantidad_: idMueble.cantidad_ + mueble.cantidad }, { new: true, runValidators: true });
+        } else {
+          // Si la transacción era una compra, quitamos los muebles del stock
+          await muebleModel.findOneAndUpdate({ _id: mueble.muebleId }, { cantidad_: idMueble.cantidad_ - mueble.cantidad }, { new: true, runValidators: true });
+        }
+      }
+      transaccionesEliminadas.push(result);
     }
     res.status(200).send(transaccionesEliminadas);
   } catch (error) {
@@ -164,8 +241,21 @@ transaccionRouter.delete('/transactions/:id', async (req, res) => {
   try {
     let transaccionesEliminadas: TransaccionDocumentInterface[] = [];
     for (const model of models) {
-      let result = await model.findOneAndDelete({ id_: req.params.id });
-      if (result) { transaccionesEliminadas.push(result); }
+      let result = await model.deleteMany({ id_: req.params.id });
+      if (!result) { continue }
+      // Iteramos sobre los muebles de la transacción que eliminamos para devolverlos al stock
+      for (const mueble of result.muebles_) {
+        let idMueble = await muebleModel.findOne({ _id: mueble.muebleId });
+        if (!idMueble) { continue; }
+        // Si la transacción era una venta, devolvemos los muebles al stock
+        if (mueble.tipo_ === 'venta') {
+          await muebleModel.findOneAndUpdate({ _id: mueble.muebleId }, { cantidad_: idMueble.cantidad_ + mueble.cantidad }, { new: true, runValidators: true });
+        } else {
+          // Si la transacción era una compra, quitamos los muebles del stock
+          await muebleModel.findOneAndUpdate({ _id: mueble.muebleId }, { cantidad_: idMueble.cantidad_ - mueble.cantidad }, { new: true, runValidators: true });
+        }
+      }
+      transaccionesEliminadas.push(result);
     }
     res.status(200).send(transaccionesEliminadas);
   } catch (error) {

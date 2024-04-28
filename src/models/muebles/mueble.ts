@@ -21,6 +21,7 @@ export interface MuebleDocumentInterface extends Document {
   descripcion_: string,
   dimensiones_: Dimension,
   color_: string,
+  precio_: number,
   cantidad_: number
 }
 
@@ -111,6 +112,18 @@ const MuebleSchema = new Schema<MuebleDocumentInterface>({
       }
       if (/\d/.test(value)) {
         throw new Error('El color de un mueble no puede contener números.');
+      }
+    }
+  }, 
+  precio_: {
+    type: Number,
+    required: true,
+    validate: (value: number) => {
+      if (value < 0) {
+        throw new Error('La cantidad de un mueble no puede ser negativa.');
+      }
+      if (value % 1 !== 0) {
+        throw new Error('La cantidad de un mueble no puede ser un número decimal.');
       }
     }
   },
