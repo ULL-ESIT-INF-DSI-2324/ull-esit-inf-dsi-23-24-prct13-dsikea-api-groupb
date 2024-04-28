@@ -84,23 +84,18 @@ const TransaccionSchema = new Schema<TransaccionDocumentInterface>({
   },
   muebles_: {
     type: [{
-      muebleId: {
-        type: Schema.Types.ObjectId,
-        ref: 'Mueble', // Referencia al modelo de Mueble
-        required: true,
-        validate: {
-          validator: async function(value: Schema.Types.ObjectId) {
-            // Busca el mueble en la base de datos
-            const mueble = await muebleModel.findById(value);
-            // Devuelve true si el mueble existe, false si no
-            return !!mueble;
-          },
-          message: props => `El mueble asociado con ID ${props.value} no existe en la base de datos.`
-        }
-      },
+      muebleId: { type: Schema.Types.ObjectId, required: true },
       cantidad: { type: Number, required: true }
     }],
-    required: true
+    required: true,
+    ref: 'Mueble',
+    validate: async function(value: Schema.Types.ObjectId) {
+      // Busca el mueble en la base de datos
+      const mueble = await muebleModel.findById(value);
+      // Devuelve true si el mueble existe, false si no
+      return !!mueble;
+    },
+    message: (props : TransaccionDocumentInterface) => `El mueble asociado con ID ${props} no existe en la base de datos.`
   },
   persona_: {
     type: Schema.Types.ObjectId,
@@ -119,14 +114,22 @@ const TransaccionSchema = new Schema<TransaccionDocumentInterface>({
   tipo_: {
     type: String,
     enum: ['Compra', 'Venta', 'Devolución'],
-    required: true,
-
-    // si es una compra, el importe es negativo
-    // si es una venta, el importe es positivo
-    // si es una devolución, el importe es positivo
-   
+    required: true
   }
 });
+    
+
+TransaccionSchema.path('muebles_').validate((value: [{
+  muebleId: { type: Schema.Types.ObjectId, required: true },
+  cantidad: { type: Number, required: true }
+}],
+) => {
+  if (value.length === 0) {
+    
+  }
+  
+});
+   
 
 /**
  * Exportación del modelo de la colección de Personas
