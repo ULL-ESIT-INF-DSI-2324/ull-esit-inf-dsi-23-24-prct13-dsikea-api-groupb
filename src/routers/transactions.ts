@@ -18,7 +18,7 @@ import { compraModel } from '../models/transacciones/compra.js'
 // Declaración del router
 export const transaccionRouter = Express.Router();
 let models: any[] = [devolucionModel, ventaModel, transaccionModel,];
-let modelsPost: any[] = [compraModel, ventaModel];
+// let modelsPost: any[] = [compraModel, ventaModel];
 
 /**
  * Busca una transacción en la base de datos haciendo uso de la QueryString
