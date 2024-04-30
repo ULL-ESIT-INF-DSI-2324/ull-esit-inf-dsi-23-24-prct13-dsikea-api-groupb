@@ -9,7 +9,6 @@
  */
 import Express from 'express';
 import { Schema } from 'mongoose';
-// import { getModel } from '../../auxFiles/getModels.js'
 import { TransaccionDocumentInterface } from '../../models/transacciones/transaccion.js';
 import { PersonaDocumentInterface } from '../../models/personas/persona.js';
 

@@ -59,50 +59,6 @@ transaccionRouter.post('/transactions', async (req, res) => {
   }
 });
 
-
-/**
- * Actualiza una transacción de la base de datos haciendo uso de la QueryString
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- * @returns {Object} - Objeto JSON con la transacción actualizada o un mensaje de error
- */
-transaccionRouter.patch('/transactions', async (req, res) => {
-  req.query = { ...req.query };
-  try {
-    let transaccionesActualizadas: TransaccionDocumentInterface[] = [];
-    for (const model of transactionsModels) {
-      let result = await model.updateMany(req.query, req.query.update);
-      if (!result) { continue; }
-      transaccionesActualizadas.push(result);
-      // DE ESTA PARTE PARA ABAJO, XD NO ESTÁ IMPLEMENTADO EN REALIDAD, MUY XD TODO: PROBAR QUE SE APLICAN LOS STOCKS SI SE AUMENTA O DISMINUYE
-      // CANTIDAD DE MUEBLES
-      // Iteramos por los muebles de la transacción junto a sus cantidades
-      for (const mueble of result.muebles_) {
-        let idMueble = await muebleModel.findOne({ _id: mueble.muebleId });
-        if (!idMueble) { continue; }
-        await muebleModel.findOneAndUpdate({ _id: mueble.muebleId }, { cantidad_: idMueble.cantidad_ + mueble.cantidad });
-      }
-      let importeTotal: number = 0;
-      let mueblesCambiados = [];
-      for (const mueble of req.body.muebles_) {
-        let idMueble = await muebleModel.findOne({ id_: mueble.muebleId });
-        if (!idMueble) { continue; }
-        if (mueble.tipo_ === 'venta' && idMueble.cantidad_ < mueble.cantidad) {
-          throw new Error('No hay suficientes muebles en stock');
-        }
-        await muebleModel.findOneAndUpdate({ _id: mueble.muebleId._id }, { cantidad_: idMueble.cantidad_ - mueble.cantidad });
-        importeTotal += idMueble!.precio_ * mueble.cantidad;
-        mueblesCambiados.push({ muebleId: idMueble?._id, cantidad: mueble.cantidad });
-      }
-      transaccionesActualizadas.push(result);
-
-    }
-    res.status(200).send(transaccionesActualizadas);
-  } catch (error) {
-    res.status(500).send({ msg: 'Error al actualizar la transacción', error: error });
-  }
-});
-
 /**
  * Actualiza una transacción de la base de datos haciendo uso del ID de manera dinámica
  * @param {Object} req - Objeto de petición
@@ -111,59 +67,44 @@ transaccionRouter.patch('/transactions', async (req, res) => {
  */
 transaccionRouter.patch('/transactions/:id', async (req, res) => {
   try {
-    let transaccionesActualizadas: TransaccionDocumentInterface[] = [];
-    for (const model of transactionsModels) {
-      // Actualización de la transacción
-      let result = await model.findOneAndUpdate({ id_: req.params.id }, req.body, { new: true, runValidators: true });
-      if (!result) { continue; }
-      // DE ESTA PARTE PARA ABAJO, XD NO ESTÁ IMPLEMENTADO EN REALIDAD, MUY XD TODO: PROBAR QUE SE APLICAN LOS STOCKS SI SE AUMENTA O DISMINUYE
-      // CANTIDAD DE MUEBLES
-      // Iteramos por los muebles de la transacción junto a sus cantidades
-      for (const mueble of result.muebles_) {
-        let idMueble = await muebleModel.findOne({ _id: mueble.muebleId });
-        if (!idMueble) { continue; }
-        await muebleModel.findOneAndUpdate({ _id: mueble.muebleId }, { cantidad_: idMueble.cantidad_ + mueble.cantidad });
-      }
-      let importeTotal: number = 0;
-      let mueblesCambiados = [];
+    // Se recupera la transacción anterior
+    let transaccionAModificar = await transactionsModels[0].findOne({ id_: req.params.id });
+    // Si está definido el array muebles_ en el body de la petición, se itera sobre el array de muebles
+    if (req.body.muebles_) {
       for (const mueble of req.body.muebles_) {
-        let idMueble = await muebleModel.findOne({ id_: mueble.muebleId });
-        if (!idMueble) { continue; }
-        if (mueble.tipo_ === 'venta' && idMueble.cantidad_ < mueble.cantidad) {
-          throw new Error('No hay suficientes muebles en stock');
+        let muebleEncontrado = await muebleModel.findOne({ nombre_: mueble.muebleId });
+        // Si no se encuentra el mueble, se lanza un error
+        if (!muebleEncontrado) {
+          throw new Error('El mueble no existe');
         }
-        await muebleModel.findOneAndUpdate({ _id: mueble.muebleId._id }, { cantidad_: idMueble.cantidad_ - mueble.cantidad });
-        importeTotal += idMueble!.precio_ * mueble.cantidad;
-        mueblesCambiados.push({ muebleId: idMueble?._id, cantidad: mueble.cantidad });
+        // Se calcula la diferencia entre la cantidad de muebles de la transacción anterior, y la cantidad de muebles de la transacción actual
+        let diferencia =  mueble.cantidad - transaccionAModificar.muebles_.find({muebleId: muebleEncontrado._id}).cantidad;
+        // Se tienen en cuenta
+        if (req.body.tipo_ === 'venta') {
+          // Si la diferencia es menor que 0, se añaden los muebles al stock., en caso contrario, se suman          
+          diferencia > 0 ? muebleEncontrado.cantidad_ -= diferencia : muebleEncontrado.cantidad_ += diferencia;   
+          diferencia > 0 ? transaccionAModificar.importe_ -= muebleEncontrado.precio_ * diferencia : transaccionAModificar.importe_ += muebleEncontrado.precio_ * Math.abs(diferencia);
+          // Se comprueba que la cantidad de muebles en stock sea mayor o igual a 0, en caso contrario, se lanza un error
+          if (muebleEncontrado.cantidad_ < 0) {
+            throw new Error('No hay suficientes muebles en stock');
+          }
+        } else if (req.body.tipo_ === 'compra') {
+          // Si la diferencia es mayor que 0, se añaden los muebles al stock., en caso contrario, se restan
+          diferencia > 0 ? muebleEncontrado.cantidad_ += diferencia : muebleEncontrado.cantidad_ -= diferencia;
+          diferencia > 0 ? transaccionAModificar.importe_ += muebleEncontrado.precio_ * diferencia : transaccionAModificar.importe_ -= muebleEncontrado.precio_ * Math.abs(diferencia);
+        }
+        // Se guarda el mueble
+        muebleEncontrado.save();
       }
-      transaccionesActualizadas.push(result);
     }
-    res.status(200).send(transaccionesActualizadas);
+    // Se borra del body los muebles, ya que no se pueden actualizar
+    delete req.body.muebles_;
+    // Se actualiza la transacción
+    transaccionAModificar = await transactionsModels[0].findOneAndUpdate({ id_: req.params.id}, req.body, {new: true, runValidators: true});
+    transaccionAModificar.save();
+    res.status(200).send(transaccionAModificar);
   } catch (error) {
     res.status(500).send({ msg: 'Error al actualizar la transacción', error: error });
-  }
-});
-
-/**
- * Elimina una transacción de la base de datos haciendo uso de la QueryString
- * @param {Object} req - Objeto de petición
- * @param {Object} res - Objeto de respuesta
- * @returns {Object} - Objeto JSON con la transacción eliminada o un mensaje de error
- */
-transaccionRouter.delete('/transactions', async (req, res) => {
-  req.query = { ...req.query };
-  try {
-    let transaccionesEliminadas: TransaccionDocumentInterface[] = [];
-    for (const model of transactionsModels) {
-      let result = await model.deleteMany(req.query);
-      if (!result) { continue }
-      // Iteramos sobre los muebles de la transacción que eliminamos para devolverlos al stock
-      await actualizarStock(result, req);
-      transaccionesEliminadas.push(result);
-    }
-    res.status(200).send(transaccionesEliminadas);
-  } catch (error) {
-    res.status(500).send({ msg: 'Error al eliminar la transacción', error: error });
   }
 });
 
