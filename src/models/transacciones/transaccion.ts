@@ -20,11 +20,11 @@ export interface TransaccionDocumentInterface extends Document {
   fechafin_: Date,
   importe_: number,
   muebles_: [{
-    muebleId: { type: Schema.Types.ObjectId, required: true },
-    cantidad: { type: Number, required: true }
+    muebleId: Schema.Types.ObjectId,
+    cantidad: number
   }],
   persona_: Schema.Types.ObjectId,
-  tipo_ : Enumerator
+  tipo_ : string
 }
 
 /**
@@ -113,21 +113,37 @@ const TransaccionSchema = new Schema<TransaccionDocumentInterface>({
   },
   tipo_: {
     type: String,
-    enum: ['Compra', 'Venta', 'Devolución'],
+    // enum: ['Compra', 'Venta', 'Devolución'],
     required: true
   }
 });
-    
 
-TransaccionSchema.path('muebles_').validate((value: [{
-  muebleId: { type: Schema.Types.ObjectId, required: true },
-  cantidad: { type: Number, required: true }
-}],
-) => {
-  if (value.length === 0) {
-    
+/**
+ * Validación de las cantidades de los muebles en una transacción
+ * @param this Transacción a validar
+ * @param value Muebles de la transacción
+ */
+TransaccionSchema.path('muebles_').validate(async function(this: TransaccionDocumentInterface, value: {muebleId: Schema.Types.ObjectId, cantidad: number}[]) {
+  for (const mueble of value) {
+    // Comprueba que la cantidad sea un número entero positivo
+    if (mueble.cantidad < 0) {
+      throw new Error('La cantidad de un mueble en una transacción no puede ser negativa.');
+    }
+    // Comprueba que la cantidad sea un número entero
+    if (mueble.cantidad % 1 !== 0) {
+      throw new Error('La cantidad de un mueble en una transacción no puede ser un número decimal.');
+    }
+    // Comprobación de existencia del mueble
+    const muebleDocument = await muebleModel.findById(mueble.muebleId);
+    if (!muebleDocument) {
+      throw new Error(`El mueble asociado con ID ${mueble.muebleId} no existe en la base de datos.`);
+    }
+    // Comprueba que la cantidad no sea mayor que la cantidad de muebles en stock
+    if (this.tipo_ === 'Venta' && mueble.cantidad > muebleDocument.cantidad_) {
+      throw new Error(`La cantidad de muebles en la transacción es mayor que la cantidad de muebles en stock.`);
+    }
   }
-  
+  return true;
 });
    
 

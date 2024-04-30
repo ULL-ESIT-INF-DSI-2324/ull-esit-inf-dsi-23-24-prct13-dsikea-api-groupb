@@ -29,13 +29,14 @@
   "license": "ISC",
   "type": "module",
   "scripts": {
-    "start": "tsc-watch --onSuccess \"node dist index.js\"",
+    "start": "node ./dist/index.js",
     "test": "env-cmd -f ./config/test.env mocha --exit",
     "coverage": "c8 npm test && c8 report --reporter=lcov",
     "doc": "typedoc",
     "server": "tsc && node dist/ArchivosNuevos/serverExpress.js &",
     "git": "git add . && git commit -m \"Updates\" && git push",
-    "dev": "tsc-watch --onSuccess \"env-cmd -f ./config/dev.env node dist/index.js\""
+    "dev": "tsc-watch --onSuccess \"env-cmd -f ./config/dev.env node dist/index.js\"",
+    "build": "tsc" 
   },
   "devDependencies": {
     "@types/chai": "^4.3.12",
@@ -58,10 +59,10 @@
     "ts-node": "^10.9.2",
     "tsc-watch": "^6.0.4",
     "typedoc": "^0.25.11",
-    "typescript": "^5.3.3",
     "validator": "^13.11.0"
   },
   "dependencies": {
+    "typescript": "^5.3.3",
     "chalk": "^5.3.0",
     "express": "^4.19.2",
     "mongoose": "^8.3.2"

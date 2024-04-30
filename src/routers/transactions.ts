@@ -8,6 +8,7 @@
  *  > Omar Suárez Doro (alu0101483474@ull.edu.es)
  */
 import Express from 'express';
+import { Schema } from 'mongoose';
 import { transaccionModel, TransaccionDocumentInterface } from '../models/transacciones/transaccion.js';
 import { devolucionModel } from '../models/transacciones/devolucion.js';
 import { ventaModel } from '../models/transacciones/venta.js';
@@ -71,47 +72,57 @@ transaccionRouter.get('/transactions/:id', async (req, res) => {
  */
 transaccionRouter.post('/transactions', async (req, res) => {
   try {
-    // TODO: Validar que la persona y el mueble existen con los validadores de mongoose
-    // Parse de los datos
-    let idPersona = await personaModel.findOne({ id_: req.body.persona_ });
-    let importeTotal: number = 0;
-    let mueblesCambiados = [];
-    for (const mueble of req.body.muebles_) {
-      let idMueble = await muebleModel.findOne({ id_: mueble.muebleId });
-      if (!idMueble) { continue; }
-      // Si es una venta, debe haber suficientes muebles en stock  ----> Esto debería estar en el validador de mongoose ¡Arreglar!
-      if (mueble.tipo_ === 'venta' && idMueble.cantidad_ < mueble.cantidad) {
-        throw new Error('No hay suficientes muebles en stock');
-      }
-      // Actualización de la cantidad de muebles, importe total y array de muebles cambiados
-      await muebleModel.findOneAndUpdate({ _id: mueble.muebleId._id }, { cantidad_: idMueble.cantidad_ - mueble.cantidad });
-      importeTotal += idMueble!.precio_ * mueble.cantidad;
-      mueblesCambiados.push({ muebleId: idMueble?._id, cantidad: mueble.cantidad });
-    }
-    // Modificación del Body Original
-    let changedObj = { ...req.body };
-    changedObj.persona_ = idPersona;
-    changedObj.importe_ = importeTotal;
-    changedObj.muebles_ = mueblesCambiados;
-    // En función del tipo de transacción se crea un modelo u otro
-    let model = null;
-    console.log(changedObj);
-    switch (req.body.tipo_) {
-      case 'compra':
-        model = new compraModel(changedObj);
-        break;
-      case 'venta':
-        model = new ventaModel(changedObj);
-        break;
-      default:
-        throw new Error('Tipo de transacción no soportado');
-    }
+    // Parsear y validar datos
+    const { idPersona, importeTotal, mueblesCambiados } = await parseData(req.body);
+    // Crear instancia del modelo de transacción
+    const TransaccionModel = getModel(req.body.tipo_);
+    const model = new TransaccionModel({
+      persona: idPersona,
+      importe: importeTotal,
+      muebles: mueblesCambiados
+    });
+    // Guardar el modelo de transacción
     await model.save();
     res.send(model);
   } catch (error) {
     res.status(500).send({ msg: 'Error al guardar la transacción', error: error });
   }
 });
+
+/**
+ * Este método se encarga de 
+ * @param body Transacción a parsear
+ * @returns 
+ */
+async function parseData(body: TransaccionDocumentInterface) {
+  const idPersona = await personaModel.findOne({ id_: body.persona_ });
+  let importeTotal = 0;
+  let mueblesCambiados = [];
+
+  for (const mueble of body.muebles_) {
+    const idMueble = await muebleModel.findOne({ id_: mueble.muebleId });
+    if (!idMueble) { continue; }
+
+    // Actualizar cantidad de muebles y calcular importe total
+    await muebleModel.findOneAndUpdate({ _id: mueble.muebleId }, { cantidad_: idMueble.cantidad_ - mueble.cantidad });
+    importeTotal += idMueble!.precio_ * mueble.cantidad;
+    mueblesCambiados.push({ muebleId: idMueble?._id, cantidad: mueble.cantidad });
+  }
+
+  return { idPersona, importeTotal, mueblesCambiados };
+}
+
+function getModel(tipo: string) {
+  switch (tipo.toLowerCase()) {
+    case 'compra':
+      return compraModel;
+    case 'venta':
+      return ventaModel;
+    default:
+      throw new Error('Tipo de transacción no soportado');
+  }
+}
+
 
 /**
  * Actualiza una transacción de la base de datos haciendo uso de la QueryString
@@ -196,7 +207,6 @@ transaccionRouter.patch('/transactions/:id', async (req, res) => {
     res.status(500).send({ msg: 'Error al actualizar la transacción', error: error });
   }
 });
-
 
 /**
  * Elimina una transacción de la base de datos haciendo uso de la QueryString
