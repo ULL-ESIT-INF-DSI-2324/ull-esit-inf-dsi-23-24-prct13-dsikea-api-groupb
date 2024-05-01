@@ -44,13 +44,17 @@ transaccionRouter.post('/transactions', async (req, res) => {
   try {
     // Parsear y validar datos
     const { idPersona, importeTotal, mueblesCambiados } = await parseData(req);
+    req.body.muebles_ = mueblesCambiados;
+    req.body.persona_ = idPersona;
     // Crear instancia del modelo de transacción
     const TransaccionModel = getModel(req.body.tipo_);
     const model = new TransaccionModel({
-      persona: idPersona,
-      importe: importeTotal,
-      muebles: mueblesCambiados
+      persona_: idPersona,
+      importe_: importeTotal,
+      muebles_: mueblesCambiados,
+      ...req.body 
     });
+    console.log(model)
     // Guardar el modelo de transacción
     await model.save();
     res.send(model);

@@ -70,25 +70,30 @@ export async function getFoundTransactions(req : request) {
  * @returns Datos de la transacción
  */
 export async function parseData(req: request) {
-  const objPersona : PersonaDocumentInterface | null = await personaModel.findOne({ nombre_: req.body.persona_ });
+  const objPersona : PersonaDocumentInterface | null = await personaModel.findOne({ id_: req.body.persona_ });
+  console.log("MIAU");
   if (!objPersona) {
+    console.log("no ha encontrado la persona")
     throw new Error(`No se encontró la persona ${req.body.persona_}`);
   }
   let idPersona = objPersona._id;  
   let importeTotal = 0;
   let mueblesCambiados: {muebleId: Schema.Types.ObjectId,  cantidad: number}[] = [];
   for (const mueble of req.body.muebles_) {
+    console.log("MIAU MIAU");
     const idMueble = await muebleModel.findOne({ nombre_: mueble.muebleId });
+    console.log(idMueble!._id)
     if (!idMueble) { continue; }
     // Si la transacción es de venta y no hay suficientes unidades en stock, se lanza un error
     if (idMueble.cantidad_ < mueble.cantidad) {
       throw new Error(`No hay suficientes unidades de ${mueble.muebleId} en stock`);
     }
     // Actualizar cantidad de muebles y calcular importe total
-    await muebleModel.findOneAndUpdate({ _id: mueble.muebleId }, { cantidad_: idMueble.cantidad_ - mueble.cantidad });
+    await muebleModel.findOneAndUpdate({ _id: idMueble._id }, { cantidad_: idMueble.cantidad_ - mueble.cantidad });
     importeTotal += idMueble!.precio_ * mueble.cantidad;
     mueblesCambiados.push({ muebleId: idMueble?._id, cantidad: mueble.cantidad });
   }
+  console.log({ idPersona, importeTotal, mueblesCambiados });
   return { idPersona, importeTotal, mueblesCambiados };
 }
 

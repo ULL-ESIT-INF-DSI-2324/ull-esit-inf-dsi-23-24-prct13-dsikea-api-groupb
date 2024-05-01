@@ -24,7 +24,7 @@ export let iniciarDB = () => {
 // Connect to Database
 export let iniciarDB = () => {
   // TODO: Añadir proceso que ejecute en segundo plano el la base de datos si da tiempo
-  connect(process.env.MONGODB_URL!).then(() => {
+  connect('mongodb://127.0.0.1:27017/DSIkea').then(() => {
     console.log('Connected to the database');
   }).catch(() => {
     console.log('Something went wrong when conecting to the database');
