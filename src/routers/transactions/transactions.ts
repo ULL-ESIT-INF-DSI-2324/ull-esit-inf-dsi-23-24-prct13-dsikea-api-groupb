@@ -44,22 +44,23 @@ transaccionRouter.post('/transactions', async (req, res) => {
   try {
     // Parsear y validar datos
     const { idPersona, importeTotal, mueblesCambiados } = await parseData(req);
-    req.body.muebles_ = mueblesCambiados;
-    req.body.persona_ = idPersona;
     // Crear instancia del modelo de transacción
     const TransaccionModel = getModel(req.body.tipo_);
+    req.body.muebles_ = mueblesCambiados;
+    req.body.persona_ = idPersona;
     const model = new TransaccionModel({
-      persona_: idPersona,
       importe_: importeTotal,
-      muebles_: mueblesCambiados,
       ...req.body 
     });
-    console.log(model)
+    for (const mueble of model.muebles_) {
+      delete mueble._id;
+    }
     // Guardar el modelo de transacción
     await model.save();
     res.send(model);
   } catch (error) {
-    res.status(500).send({ msg: 'Error al guardar la transacción', error: error });
+    let errorCustom = error as Error;
+    res.status(500).send({ msg: 'Error al guardar la transacción', error: errorCustom.message });
   }
 });
 

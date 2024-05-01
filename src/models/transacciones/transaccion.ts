@@ -9,7 +9,7 @@
  */
 import { Document, model, Schema } from 'mongoose';
 import { personaModel } from '../personas/persona.js';
-import { muebleModel } from '../muebles/mueble.js';
+// import { muebleModel } from '../muebles/mueble.js';
 
 /**
  * Interfaz que representa un documento de la colección de transacciones
@@ -19,10 +19,11 @@ export interface TransaccionDocumentInterface extends Document {
   fechainicio_: Date,
   fechafin_: Date,
   importe_: number,
-  muebles_: [{
+  muebles_: {
     muebleId: Schema.Types.ObjectId,
-    cantidad: number
-  }],
+    cantidad: number,
+    _id?: Schema.Types.ObjectId
+  }[],
   persona_: Schema.Types.ObjectId,
   tipo_ : string
 }
@@ -84,18 +85,10 @@ const TransaccionSchema = new Schema<TransaccionDocumentInterface>({
   },
   muebles_: {
     type: [{
-      muebleId: { type: Schema.Types.ObjectId, required: true },
-      cantidad: { type: Number, required: true }
+      muebleId: Schema.Types.ObjectId,
+      cantidad: Number
     }],
-    required: true,
-    ref: 'Mueble',
-    validate: async function(value: Schema.Types.ObjectId) {
-      // Busca el mueble en la base de datos
-      const mueble = await muebleModel.findById(value);
-      // Devuelve true si el mueble existe, false si no
-      return !!mueble;
-    },
-    message: (props : TransaccionDocumentInterface) => `El mueble asociado con ID ${props} no existe en la base de datos.`
+    required: true
   },
   persona_: {
     type: Schema.Types.ObjectId,
@@ -119,7 +112,6 @@ const TransaccionSchema = new Schema<TransaccionDocumentInterface>({
 });
 
    
-
 /**
  * Exportación del modelo de la colección de Personas
  */
