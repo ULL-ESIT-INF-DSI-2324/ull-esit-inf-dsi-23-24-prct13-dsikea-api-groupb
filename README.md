@@ -18,15 +18,26 @@ El propósito de este informe es detallar los procedimientos llevados a cabo en 
 
 # 2. 🧠 Trabajo previo 🧠
 
-Para la realización de esta práctica, no se ha relaizado realmente mucho trabajo previo. Simplemente con la lectura y compresión de los apuntes de la asignatura, junto a la búsqueda de información en la documentación del framework [Express](https://expressjs.com/es/guide/routing.html)
+Para la realización de esta práctica, se han realizado las siguientes tareas como trabajo previo:
+
+  * Lectura y compresión de los apuntes de la asignatura, junto a la búsqueda de información en la documentación del framework [Express](https://expressjs.com/es/guide/routing.html).
+  * Entender el funcionamiento de MongoDB y Mongoose.
+  * Saber cómo utilizar Atlas y Render para su desplegue web.
 
 # 3. 🖥️ Desarrollo de la práctica 🖥️
 
-En esta práctica se propone implementar el servidor con express para poder llevar a cabo la misma funcionalidad de la práctica anterior. Se ha empleado las mismas funciones pertenecientes a la clase `ServerFunctionality`, por lo que solo se comentará los manejadores definidos para los diferentes tipos de peticiones a la ruta `/cards`(aclarar que se ha controlado el acceso a otras rutas).
+En esta fase, se ha implementado el servidor utilizando Express para replicar la funcionalidad previa. Se ha integrado MongoDB y Mongoose para gestionar la base de datos de manera eficiente. Además, se ha desplegado la aplicación web utilizando MongoDB Atlas y Render, asegurando una configuración óptima y una fácil gestión del entorno de producción.
 
 # 4. Conclusiones
-Tras la realización de la práctica se han aprendida las nociones básicas para el manejo del FrameWork Express.
+
+Tras la realización de la práctica, se han aprendido las nociones básicas para el manejo del Framework Express, así como la integración con MongoDB y Mongoose para la gestión de la base de datos. Se ha logrado comprender cómo implementar un servidor API REST utilizando Express y cómo interactuar con la base de datos no relacional MongoDB mediante Mongoose.
+
+Además, se ha adquirido experiencia en el despliegue de la aplicación utilizando servicios como Atlas y Render, lo que ha permitido comprender el proceso completo desde el desarrollo hasta la puesta en producción de la aplicación web.
 
 # 5. Referencias
+
 - [Documentación de Express](https://expressjs.com/es/)
 - [Curso de Express para NodeJS](https://www.youtube.com/watch?v=JmJ1WUoUIK4)
+- [Documentación de MongoDB](https://ull-esit-inf-dsi-2324.github.io/nodejs-theory/nodejs-mongodb.html)
+- [Documentación de Mongoose](https://ull-esit-inf-dsi-2324.github.io/nodejs-theory/nodejs-mongoose.html)
+- [Documentación de Render](https://docs.render.com/)
