@@ -74,8 +74,8 @@ furnitureRouter.post('/furnitures', async (req, res) => {
       let result = await model.find({ id_: req.body.id_ });
       if (result.length > 0) {
         let response = await model.findOneAndUpdate(
-          { _id: result._id}, 
-          {cantidad_: result.cantidad_ += req.body.cantidad_}, 
+          { _id: result[0]._id}, 
+          {cantidad_: result[0].cantidad_ + req.body.cantidad_ ?? 1}, 
           {new: true, runValidators: true}
         );
         res.status(200).send(response);

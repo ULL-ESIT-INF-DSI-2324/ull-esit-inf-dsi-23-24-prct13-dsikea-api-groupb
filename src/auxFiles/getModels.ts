@@ -17,4 +17,4 @@ export function getModel(tipo: string) {
   }
 }
 
-export let transactionsModels: any[] = [devolucionModel, ventaModel, transaccionModel,];
+export let transactionsModels: any[] = [transaccionModel, devolucionModel, ventaModel];

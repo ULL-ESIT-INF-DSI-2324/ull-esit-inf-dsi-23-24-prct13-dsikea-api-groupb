@@ -22,11 +22,18 @@ export interface TransaccionDocumentInterface extends Document {
   muebles_: {
     muebleId: Schema.Types.ObjectId,
     cantidad: number,
-    _id?: Schema.Types.ObjectId
   }[],
   persona_: Schema.Types.ObjectId,
   tipo_ : string
 }
+
+/**
+ * Esquema de muebles
+ */
+const MuebleSchema = new Schema({
+  muebleId: Schema.Types.ObjectId,
+  cantidad: Number,
+});
 
 /**
  * Esquema de la colección de transacciones
@@ -84,11 +91,9 @@ const TransaccionSchema = new Schema<TransaccionDocumentInterface>({
     }
   },
   muebles_: {
-    type: [{
-      muebleId: Schema.Types.ObjectId,
-      cantidad: Number
-    }],
-    required: true
+    type: [MuebleSchema],
+    required: true,
+    _id: false
   },
   persona_: {
     type: Schema.Types.ObjectId,

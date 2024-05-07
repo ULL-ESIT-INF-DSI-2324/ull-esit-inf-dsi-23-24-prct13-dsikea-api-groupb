@@ -27,7 +27,7 @@ type response = Express.Response<any>;
  * @param req Request de la petición
  * @param res Response de la petición
  */
-export async function handleGet(req : request, res: response) {
+export async function handleGet(req: request, res: response) {
   if (!req.params.id) {
     req.query = { ...req.query };
   }
@@ -37,25 +37,36 @@ export async function handleGet(req : request, res: response) {
     error = error as Error;
     res.status(404).send({ msg: 'Error al buscar la transacción', error: error });
   }
-} 
+}
 
 /**
  * Esta función busca las transacciones en la base de datos
  * @param req La petición
  * @returns Transacciones encontradas
  */
-export async function getFoundTransactions(req : request) {
+export async function getFoundTransactions(req: request) {
   let transaccionesEncontradas: TransaccionDocumentInterface[] = [];
   for (const model of transactionsModels) {
     let result = null;
     if (req.params.id) {
       result = req.params.id === "-1" ? await model.find() : await model.findOne({ id_: req.params.id });
+      if (!result) { continue; }
+      result = [result];
     } else {
       result = await model.find(req.query);
+    } 
+    for (const transaccion of result) {
+      let duplicado: boolean = false;
+      for (const x of transaccionesEncontradas) {
+        if (!transaccion || transaccion.id_ === x.id_) {
+          duplicado = true;
+          break;
+        }
+      }
+      if (duplicado) { continue; }
+      transaccionesEncontradas.push(transaccion);
     }
-    transaccionesEncontradas.push(result!);
   }
-  transaccionesEncontradas = transaccionesEncontradas.flat().filter(x => x !== null);
   if (transaccionesEncontradas.length === 0) {
     throw new Error('No se encontró ninguna transacción.');
   }
@@ -70,13 +81,13 @@ export async function getFoundTransactions(req : request) {
  * @returns Datos de la transacción
  */
 export async function parseData(req: request) {
-  const objPersona : PersonaDocumentInterface | null = await personaModel.findOne({ id_: req.body.persona_ });
+  const objPersona: PersonaDocumentInterface | null = await personaModel.findOne({ id_: req.body.persona_ });
   if (!objPersona) {
     throw new Error(`No se encontró la persona ${req.body.persona_}`);
   }
-  let idPersona = objPersona._id.toString();  
+  let idPersona = objPersona._id.toString();
   let importeTotal = 0;
-  let mueblesCambiados: {muebleId: Schema.Types.ObjectId,  cantidad: number}[] = [];
+  let mueblesCambiados: { muebleId: Schema.Types.ObjectId, cantidad: number }[] = [];
   for (const mueble of req.body.muebles_) {
     const idMueble = await muebleModel.findOne({ nombre_: mueble.muebleId });
     if (!idMueble) { continue; }
@@ -84,7 +95,6 @@ export async function parseData(req: request) {
     if (idMueble.cantidad_ < mueble.cantidad) {
       throw new Error(`No hay suficientes unidades de ${mueble.muebleId} en stock`);
     }
-    console.log(idMueble!._id)
     // Actualizar cantidad de muebles y calcular importe total
     await muebleModel.findOneAndUpdate({ _id: idMueble._id }, { cantidad_: idMueble.cantidad_ - mueble.cantidad });
     importeTotal += idMueble!.precio_ * mueble.cantidad;
@@ -102,7 +112,7 @@ export async function parseData(req: request) {
  * @param result The result of the deleteMany query
  * @param req The request object
  */
-export async function actualizarStock(result : TransaccionDocumentInterface, req : request) {
+export async function actualizarStock(result: TransaccionDocumentInterface, req: request) {
   for (const mueble of result.muebles_) {
     let idMueble = await muebleModel.findOne({ _id: mueble.muebleId });
     if (!idMueble) { continue; }

@@ -50,11 +50,8 @@ transaccionRouter.post('/transactions', async (req, res) => {
     req.body.persona_ = idPersona;
     const model = new TransaccionModel({
       importe_: importeTotal,
-      ...req.body 
+      ...req.body
     });
-    for (const mueble of model.muebles_) {
-      delete mueble._id;
-    }
     // Guardar el modelo de transacción
     await model.save();
     res.send(model);
@@ -83,33 +80,47 @@ transaccionRouter.patch('/transactions/:id', async (req, res) => {
           throw new Error('El mueble no existe');
         }
         // Se calcula la diferencia entre la cantidad de muebles de la transacción anterior, y la cantidad de muebles de la transacción actual
-        let diferencia =  mueble.cantidad - transaccionAModificar.muebles_.find({muebleId: muebleEncontrado._id}).cantidad;
+        let muebleEnTransaccion = transaccionAModificar.muebles_.find((m: any) => m.muebleId.equals(muebleEncontrado._id));
+        let diferencia = mueble.cantidad - muebleEnTransaccion.cantidad;
+        console.log(`Básicamente ${mueble.cantidad} - ${transaccionAModificar.muebles_.find((m: any) => m.muebleId.equals(muebleEncontrado._id)).cantidad} = ${diferencia}`);
         // Se tienen en cuenta
-        if (req.body.tipo_ === 'venta') {
+        if (transaccionAModificar.tipo_ === 'venta') {
+          diferencia > 0 ? muebleEnTransaccion.cantidad += diferencia : muebleEnTransaccion.cantidad -= Math.abs(diferencia);
           // Si la diferencia es menor que 0, se añaden los muebles al stock., en caso contrario, se suman          
-          diferencia > 0 ? muebleEncontrado.cantidad_ -= diferencia : muebleEncontrado.cantidad_ += diferencia;   
-          diferencia > 0 ? transaccionAModificar.importe_ -= muebleEncontrado.precio_ * diferencia : transaccionAModificar.importe_ += muebleEncontrado.precio_ * Math.abs(diferencia);
+          diferencia > 0 ? muebleEncontrado.cantidad_ -= diferencia : muebleEncontrado.cantidad_ += Math.abs(diferencia);
+          console.log(`La nueva cantidad del mueble es ${muebleEncontrado.cantidad_}`);
+          diferencia > 0 ? transaccionAModificar.importe_ += muebleEncontrado.precio_ * Math.abs(diferencia) : transaccionAModificar.importe_ -= muebleEncontrado.precio_ * Math.abs(diferencia);
+          console.log(`El nuevo importe del mueble es ${transaccionAModificar.importe_}`);
           // Se comprueba que la cantidad de muebles en stock sea mayor o igual a 0, en caso contrario, se lanza un error
           if (muebleEncontrado.cantidad_ < 0) {
             throw new Error('No hay suficientes muebles en stock');
           }
-        } else if (req.body.tipo_ === 'compra') {
+        } else if (transaccionAModificar.tipo_ === 'compra') {
           // Si la diferencia es mayor que 0, se añaden los muebles al stock., en caso contrario, se restan
-          diferencia > 0 ? muebleEncontrado.cantidad_ += diferencia : muebleEncontrado.cantidad_ -= diferencia;
-          diferencia > 0 ? transaccionAModificar.importe_ += muebleEncontrado.precio_ * diferencia : transaccionAModificar.importe_ -= muebleEncontrado.precio_ * Math.abs(diferencia);
+          diferencia > 0 ? muebleEnTransaccion.cantidad += diferencia : muebleEnTransaccion.cantidad -= Math.abs(diferencia);
+          diferencia > 0 ? muebleEncontrado.cantidad_ += diferencia : muebleEncontrado.cantidad_ -= Math.abs(diferencia);
+          diferencia > 0 ? transaccionAModificar.importe_ -= muebleEncontrado.precio_ * Math.abs(diferencia) : transaccionAModificar.importe_ += muebleEncontrado.precio_ * Math.abs(diferencia);
         }
         // Se guarda el mueble
         muebleEncontrado.save();
+        if (transaccionAModificar.importe_ < 0 || muebleEncontrado.cantidad_ < 0 || muebleEnTransaccion.cantidad < 0) {
+          throw new Error('No se pueden realizar transacciones con valores negativos');
+        }
+        // Se borra del body los muebles, ya que no se pueden actualizar
+        // Se actualiza la transacción
+        delete req.body.muebles_;
+        for (let prop in req.body) {
+          if (req.body[prop]) {
+            transaccionAModificar[prop] = req.body[prop];
+          }
+        }
+        transaccionAModificar.save();
+        res.status(200).send(transaccionAModificar);
       }
     }
-    // Se borra del body los muebles, ya que no se pueden actualizar
-    delete req.body.muebles_;
-    // Se actualiza la transacción
-    transaccionAModificar = await transactionsModels[0].findOneAndUpdate({ id_: req.params.id}, req.body, {new: true, runValidators: true});
-    transaccionAModificar.save();
-    res.status(200).send(transaccionAModificar);
   } catch (error) {
-    res.status(500).send({ msg: 'Error al actualizar la transacción', error: error });
+    let customError = error as Error;
+    res.status(500).send({ msg: 'Error al actualizar la transacción', error: customError.message });
   }
 });
 

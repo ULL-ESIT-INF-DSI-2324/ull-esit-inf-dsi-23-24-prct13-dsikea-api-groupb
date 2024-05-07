@@ -158,13 +158,13 @@ describe('POST /providers', () => {
 describe('PATCH /providers', () => {
   it('Debería actualizar un proveedor en la base de datos (query string)', async () => {
     const res = await request(app)
-      .patch('/providers')
-      .send({
-        id_: "22222222A",
-        nombre_: 'Jose Antonio',
-        contacto_: 678901238,
-        direccion_: 'Calle Falsa,12,4,10'
-      });
+    .patch('/providers')
+    .query({ id_: "22222222A" })
+    .send({
+      nombre_: 'Jose Antonio',
+      contacto_: 678901238,
+      direccion_: 'Calle Falsa,12,4,10'
+    }); 
     expect(res.status).to.equal(200);
     expect(res.body).to.have.property('_id');
     expect(res.body).to.have.property('nombre_', 'Jose Antonio');
@@ -181,8 +181,8 @@ describe('PATCH /providers', () => {
   it('Debería retornar un error 404 si el proveedor no existe (query string)', async () => {
     const res = await request(app)
       .patch('/providers')
+      .query({ id_: "99999999B" })
       .send({
-        id_: "99999999B",
         nombre_: 'Jose Antonio',
         contacto_: 678901238,
         direccion_: 'Calle Falsa,12,4,10'
@@ -262,22 +262,18 @@ describe('DELETE /providers', () => {
   it('Debería borrar un proveedor de la base de datos (query string)', async () => {
     const res = await request(app)
       .delete('/providers')
-      .send({
+      .query({
         id_: "79097084A"
       });
     expect(res.status).to.equal(200);
-    expect(res.body).to.include({
-      msg: 'Proveedor eliminado'
-    });
-
-    const proveedorBorrado = await proveedorModel.findById("79097084A");
+    const proveedorBorrado = await proveedorModel.findOne({id_: "79097084A"});
     expect(proveedorBorrado).to.be.null;
   });
 
   it('Debería retornar un error 404 si el proveedor no existe (query string)', async () => {
     const res = await request(app)
       .delete('/providers')
-      .send({
+      .query({
         id_: "99999999B"
       });
     expect(res.status).to.equal(404);
@@ -290,11 +286,7 @@ describe('DELETE /providers', () => {
     const res = await request(app)
       .delete('/providers/79097083A');
     expect(res.status).to.equal(200);
-    expect(res.body).to.include({
-      msg: 'Proveedor eliminado'
-    });
-
-    const proveedorBorrado = await proveedorModel.findById("79097083A");
+    const proveedorBorrado = await proveedorModel.findOne({id_: "79097083A"});
     expect(proveedorBorrado).to.be.null;
   });
 

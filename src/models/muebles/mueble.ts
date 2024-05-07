@@ -26,6 +26,16 @@ export interface MuebleDocumentInterface extends Document {
 }
 
 /**
+ * Esquema de las dimensiones de un mueble
+ */
+const DimensionSchema = new Schema<Dimension>({
+  alto: Number,
+  ancho: Number,
+  largo: Number
+});
+
+
+/**
  * Esquema de la colección de Muebles
  */
 const MuebleSchema = new Schema<MuebleDocumentInterface>({
@@ -78,12 +88,9 @@ const MuebleSchema = new Schema<MuebleDocumentInterface>({
     }
   },
   dimensiones_: {
-    type: {
-      alto: Number,
-      ancho: Number,
-      largo: Number
-    },
+    type: DimensionSchema,
     required: true,
+    _id: false,
     validate: (value: Dimension) => {
       if (value.alto < 0 || value.ancho < 0 || value.largo < 0) {
         throw new Error('Las dimensiones de un mueble no pueden ser negativas.');
