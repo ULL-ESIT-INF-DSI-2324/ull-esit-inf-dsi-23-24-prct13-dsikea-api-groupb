@@ -1,8 +1,11 @@
 {
   "entryPoints": [
-    "./src/ArchivosAntiguos/*.ts",
-    "./src/ArchivosNuevos/*.ts",
-    "./src/Modificacion/*.ts"
+    "./src/db/*.ts",
+    "./src/models/*.ts",
+    "./src/routers/*.ts",
+    "./src/auxFiles/*.ts",
+    "./src/entities/*.ts",
+    "./src/index.ts"
   ],
   "out": "docs"
 }
