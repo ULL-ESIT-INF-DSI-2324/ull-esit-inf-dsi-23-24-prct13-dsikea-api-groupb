@@ -96,7 +96,7 @@ export async function parseData(req: request) {
     }
     // Actualizar cantidad de muebles y calcular importe total
     await muebleModel.findOneAndUpdate({ _id: idMueble._id }, { cantidad_: idMueble.cantidad_ - mueble.cantidad });
-    importeTotal += idMueble!.precio_ * mueble.cantidad;
+    importeTotal += idMueble.precio_ * mueble.cantidad;
     mueblesCambiados.push({ muebleId: idMueble?._id.toString(), cantidad: mueble.cantidad });
   }
   if (mueblesCambiados.length !== req.body.muebles_.length) {

@@ -9,13 +9,10 @@
  */
 
 import Express from 'express';
-import { getModel } from '../../auxFiles/getModels.js'
+import { getModel, transactionsModels } from '../../auxFiles/getModels.js'
 import { TransaccionDocumentInterface } from '../../models/transacciones/transaccion.js';
 import { handleGet, parseData, actualizarStock } from './functionsHandle.js';
-
-// Importación de modelos
 import { muebleModel } from '../../models/muebles/mueble.js';
-import { transactionsModels } from '../../auxFiles/getModels.js';
 
 // Declaración del router
 export const transaccionRouter = Express.Router();
@@ -100,7 +97,7 @@ transaccionRouter.patch('/transactions/:id', async (req, res) => {
         // Se calcula la diferencia entre la cantidad de muebles de la transacción anterior, y la cantidad de muebles de la transacción actual
         let muebleEnTransaccion = transaccionAModificar.muebles_.find((m: any) => m.muebleId.equals(muebleEncontrado!._id));
         let diferencia = mueble.cantidad - muebleEnTransaccion.cantidad;
-        console.log(`Básicamente ${mueble.cantidad} - ${transaccionAModificar.muebles_.find((m: any) => m.muebleId.equals(muebleEncontrado!._id)).cantidad} = ${diferencia}`);
+        console.log(`Básicamente ${mueble.cantidad} - ${transaccionAModificar.muebles_.find((m: any) => m.muebleId.equals(muebleEncontrado._id)).cantidad} = ${diferencia}`);
         // Se tienen en cuenta
         if (transaccionAModificar.tipo_ === 'venta') {
           diferencia > 0 ? muebleEnTransaccion.cantidad += diferencia : muebleEnTransaccion.cantidad -= Math.abs(diferencia);

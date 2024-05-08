@@ -170,7 +170,7 @@ furnitureRouter.delete('/furnitures', async (req, res) => {
       } else {
         muebleEliminado = await model.findOneAndUpdate(
           { _id: result._id}, 
-          {cantidad_: result.cantidad_ -= +req.body.cantidad_}, 
+          {cantidad_: result.cantidad_ - +req.body.cantidad_}, 
           {new: true, runValidators: true}
         );
       }
@@ -200,7 +200,7 @@ furnitureRouter.delete('/furnitures/:id', async (req, res) => {
       } else {
         muebleEliminado = await model.findOneAndUpdate(
           { _id: result._id}, 
-          {cantidad_: result.cantidad_ -= +req.body.cantidad_}, 
+          {cantidad_: result.cantidad_ - +req.body.cantidad_}, 
           {new: true, runValidators: true}
         );
       }
