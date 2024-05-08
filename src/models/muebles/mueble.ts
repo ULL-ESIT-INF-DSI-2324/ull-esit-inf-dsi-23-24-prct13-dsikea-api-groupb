@@ -8,8 +8,12 @@
  *  > Omar Suárez Doro (alu0101483474@ull.edu.es)
  */
 import { Document, model, Schema } from 'mongoose';
-import { Dimension } from '../../entities/Muebles/Mueble.js';
 
+type Dimension = {
+  alto: number,
+  ancho: number,
+  largo: number
+}
 /**
  * Interfaz que representa un documento de la colección de Muebles
  */
