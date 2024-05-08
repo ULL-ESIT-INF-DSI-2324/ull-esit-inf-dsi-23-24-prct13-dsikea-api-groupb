@@ -20,6 +20,26 @@ import { transactionsModels } from '../../auxFiles/getModels.js';
 // Declaración del router
 export const transaccionRouter = Express.Router();
 
+
+/**
+ * 
+ */
+transaccionRouter.get('/transactions/balance', async (_, res) => {
+  try {
+    let transactions: TransaccionDocumentInterface[] = await transactionsModels[0].find({});
+    if (transactions === undefined) { 
+      res.status(404).send({msg: 'No hay transacciones disponibles'}) 
+    }
+    let sum : number = 0;
+    for (const t of transactions) {
+      sum += t.importe_;
+    }
+    res.status(200).send({balance: sum / transactions.length});
+  } catch (error) {
+    res.status(500).send({ msg: 'Error al eliminar la transacción', error: error });
+  }
+});
+
 /**
  * Busca una transacción en la base de datos haciendo uso de la QueryString
  * @returns {Object} - Objeto JSON con la transacción encontrada o un mensaje de error
@@ -143,23 +163,6 @@ transaccionRouter.delete('/transactions/:id', async (req, res) => {
       transaccionesEliminadas.push(transaccion);
     }
     res.status(transaccionesEliminadas.length === 0 ? 404 : 200).send(transaccionesEliminadas.length === 0 ? {msg: 'Transacción no encontrada.'} : transaccionesEliminadas);
-  } catch (error) {
-    res.status(500).send({ msg: 'Error al eliminar la transacción', error: error });
-  }
-});
-
-
-transaccionRouter.delete('/transactions/balance', async (_, res) => {
-  try {
-    let transactions = transactionsModels[0].find();
-    if (transactions === undefined) { 
-      res.status(404).send({msg: 'No hay transacciones disponibles'}) 
-    }
-    let sum : number = 0;
-    for (const t of transactions) {
-      sum += t.importe_;
-    }
-    res.status(200).send({balance: sum / transactions.length});
   } catch (error) {
     res.status(500).send({ msg: 'Error al eliminar la transacción', error: error });
   }

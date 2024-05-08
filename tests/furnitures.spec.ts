@@ -4,6 +4,7 @@ import { sillaModel } from '../src/models/muebles/silla.js';
 import { mesaModel } from '../src/models/muebles/mesa.js';
 import { armarioModel } from '../src/models/muebles/armario.js';
 import { expect } from 'chai';
+import { muebleModel } from '../src/models/muebles/mueble.js';
 
 // Base de Datos inicial
 const primeraSilla = {
@@ -661,5 +662,159 @@ describe('DELETE /furnitures', () => {
     });
 });
 
+describe('Armario Schema', () => {
+  it('Debería retornar un error si intenta crear un armario con puertas decimales', async () => {
+    const error = new Error('Un armario no puede tener un número decimal de puertas.');
+    try {
+      await armarioModel.create({ cajones_: true, puertas_: 3.5 });
+    } catch (err: any) {
+      expect(err.message).to.include(error.message);
+    }
+  });
+ 
+
+  it('Debería retornar un error si el número de puertas es negativo', async () => {
+    const error = new Error('Un armario no puede tener puertas negativas.');
+    try {
+      await armarioModel.create({ cajones_: true, puertas_: -2 });;
+    } catch (err: any) {
+      expect(err.message).to.include(error.message);
+    }
+  });
+});
+
+describe('Mesa Schema', () => {
+  it('Debería retornar un error si intenta crear una mesa con sillas decimales', async () => {
+    const error = new Error('Una mesa no puede tener un número decimal de sillas.');
+    try {
+      await mesaModel.create({ extensible_: false, sillas_: 3.5 });
+    } catch (err: any) {
+      expect(err.message).to.include(error.message);
+    }
+  });
+
+  it('Debería retornar un error si el número de sillas es negativo', async () => {
+    const error = new Error('Una mesa no puede tener un número negativo de sillas.');
+    try {
+      await mesaModel.create({ extensible_: false, sillas_: -2 });
+    } catch (err: any) {
+      expect(err.message).to.include(error.message);
+    }
+  });
+});
+
+describe('Mueble Schema', () => {
+  it('La descripción de mueble no puedo estar vacía', async () => {
+    try {
+      await muebleModel.create({ descripcion_: '' });
+    } catch (err: any) {
+      expect(err.name).to.equal('ValidationError');
+    }
+  });
+
+  it('El precio de un mueble no puede ser negativo', async () => {
+    try {
+      await muebleModel.create({ precio_: -100 });
+    } catch (err: any) {
+      expect(err.name).to.equal('ValidationError');
+    }
+  });
+
+  it('El precio de un mueble no puede ser un número decimal', async () => {
+    try {
+      await muebleModel.create({ precio_: 100.5 });
+    } catch (err: any) {
+      expect(err.name).to.equal('ValidationError');
+    }
+  });
+
+  it ('La descripción de un mueble tiene que acabar con un punto', async () => {
+    try {
+      await muebleModel.create({ descripcion_: 'Mesa de prueba' });
+    } catch (err: any) {
+      expect(err.name).to.equal('ValidationError');
+    }
+  });
+
+  it('El id de un mueble no puede ser negativo', async () => {
+    try {
+      await muebleModel.create({ id_: -100 });
+    } catch (err: any) {
+      expect(err.name).to.equal('ValidationError');
+    }
+  });
+
+  it('El id de un mueble no puede ser un número decimal', async () => {
+    try {
+      await muebleModel.create({ id_: 100.5 });
+    } catch (err: any) {
+      expect(err.name).to.equal('ValidationError');
+    }
+  });
+
+  it('El nombre de un mueble no puede estar vacío', async () => {
+    try {
+      await muebleModel.create({ nombre_: '' });
+    } catch (err: any) {
+      expect(err.name).to.equal('ValidationError');
+    }
+  });
+
+  it('El nombre de un mueble no puede contener números', async () => {
+    try {
+      await muebleModel.create({ nombre_: 'Mesa 1' });
+    } catch (err: any) {
+      expect(err.name).to.equal('ValidationError');
+    }
+  });
+
+  it('El color de un mueble no puede estar vacío', async () => {
+    try {
+      await muebleModel.create({ color_: '' });
+    } catch (err: any) {
+      expect(err.name).to.equal('ValidationError');
+    }
+  });
+
+  it('El color de un mueble no puede contener números', async () => {
+    try {
+      await muebleModel.create({ color_: 'blanco1' });
+    } catch (err: any) {
+      expect(err.name).to.equal('ValidationError');
+    }
+  });
+
+  it('La cantidad de un mueble no puede ser negativa', async () => {
+    try {
+      await muebleModel.create({ cantidad_: -100 });
+    } catch (err: any) {
+      expect(err.name).to.equal('ValidationError');
+    }
+  });
+
+  it('La cantidad de un mueble no puede ser un número decimal', async () => {
+    try {
+      await muebleModel.create({ cantidad_: 100.5 });
+    } catch (err: any) {
+      expect(err.name).to.equal('ValidationError');
+    }
+  });
+
+  it('El tipo de un mueble tiene que ser silla, mesa o armario', async () => {
+    try {
+      await muebleModel.create({ tipo_: 'sillon' });
+    } catch (err: any) {
+      expect(err.name).to.equal('ValidationError');
+    }
+  });
+
+  it('El tipo de un mueble no puede estar vacío', async () => {
+    try {
+      await muebleModel.create({ tipo_: '' });
+    } catch (err: any) {
+      expect(err.name).to.equal('ValidationError');
+    }
+  });
+});
 
 

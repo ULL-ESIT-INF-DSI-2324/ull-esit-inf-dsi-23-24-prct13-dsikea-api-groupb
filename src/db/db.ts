@@ -11,7 +11,6 @@ import { connect } from 'mongoose';
 
 // Connect to Database
 export let iniciarDB = () => {
-  // TODO: Añadir proceso que ejecute en segundo plano el la base de datos si da tiempo
   connect(process.env.MONGODB_URL!).then(() => {
     console.log('Connected to the database');
   }).catch(() => {

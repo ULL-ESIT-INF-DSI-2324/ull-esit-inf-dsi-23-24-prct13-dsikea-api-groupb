@@ -3,6 +3,7 @@ import { app } from '../src/index.js';
 import { expect } from 'chai';
 import { describe, it } from 'mocha';
 import { clienteModel } from '../src/models/personas/cliente.js';
+import { personaModel } from '../src/models/personas/persona.js';
 
 
 //Base de Datos inicial
@@ -150,5 +151,32 @@ describe('DELETE /customers', () => {
     expect(res.body).to.have.property('nombre_', 'Pablo');
     const clienteEliminado = await clienteModel.findOne({ id_: '11111111C' });
     expect(clienteEliminado).to.be.null;
+  });
+});
+
+
+describe('Persona Schema', () => {
+  it('Debería retornar un error si el ID de una persona es vacío', async () => {
+    try {
+      await clienteModel.create({ id_: '' });
+    } catch (err: any) {
+      expect(err.name).to.equal('ValidationError');
+    }
+  });
+
+  it('Debería retornar un error si el ID de una persona no tiene 9 caracteres', async () => {
+    try {
+      await personaModel.create({ id_: '12345678A' });
+    } catch (err: any) {
+      expect(err.name).to.equal('ValidationError');
+    }
+  });
+
+  it('Debería retornar un error si el ID de una persona no tiene un formato válido', async () => {
+    try {
+      await personaModel.create({ id_: '12345678a' }); 
+    } catch (err: any) {
+      expect(err.name).to.equal('ValidationError');
+    }
   });
 });

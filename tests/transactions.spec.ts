@@ -2,7 +2,6 @@ import request from 'supertest';
 import { app } from '../src/index.js';
 import { expect } from 'chai';
 import { describe, it, before } from 'mocha';
-// import { transaccionModel } from '../src/models/transacciones/transaccion.js';
 import { sillaModel } from '../src/models/muebles/silla.js';
 import { clienteModel } from '../src/models/personas/cliente.js';
 import { transaccionModel } from '../src/models/transacciones/transaccion.js';
@@ -59,7 +58,7 @@ describe('POST /transactions', () => {
     await new sillaModel(primeraSilla).save();
     await new sillaModel(segundaSilla).save();
   });
-  it('should create a new transaction', async () => {
+  it('Debería crear una transacción nueva', async () => {
     const response = await request(app).post('/transactions').send({
       id_: 1,
       fechainicio_: "02/02/2023",
@@ -79,7 +78,7 @@ describe('POST /transactions', () => {
     expect(response.body).to.have.property('tipo_');
   });
 
-  it('should create a new transaction', async () => {
+  it('Debería crear una transacción nueva', async () => {
     const response = await request(app).post('/transactions').send({
       id_: 2,
       fechainicio_: "02/02/2023",
@@ -98,7 +97,7 @@ describe('POST /transactions', () => {
     expect(response.body).to.have.property('tipo_');
   });
 
-  it('should return 500 if the request is invalid', async () => {
+  it('Debería retornar 500 si la petición no es válida', async () => {
     const response = await request(app).post('/transactions').send({
       fechainicio_: "02/02/2023",
       fechafin_: "03/03/2024",
@@ -107,43 +106,62 @@ describe('POST /transactions', () => {
       tipo_: "venta"
     });
     expect(response.status).to.equal(500);
+    expect(response.body).to.include({ msg: 'Error al guardar la transacción' });
   });
 });
 
 describe('GET /transactions', () => {
-  it('should return all transactions', async () => {
+  it('Debería devolver todas las transacciones', async () => {
     const response = await request(app).get('/transactions');
     expect(response.status).to.equal(200);
     expect(response.body).to.have.lengthOf(2);
   });
-  it('should return a transaction by id', async () => {
+  it('Debería devolver una transacción a partir de un id específico', async () => {
     const response = await request(app).get('/transactions/1');
     expect(response.body[0]).to.have.property('id_');
     expect(response.status).to.equal(200);
   });
-  it('should return 404 if the transaction is not found', async () => {
+
+  it('Debería devolver un error 404 si no se encuentra la transacción', async () => {
+    const response = await request(app).get('/transactions/99');
+    expect(response.status).to.equal(404);
+    expect(response.body).to.include({ msg: 'Error al buscar la transacción' });
+  });
+  it('Debería devolver un error 404 si no se encuentra la transacción', async () => {
     const response = await request(app).get('/transactions/999');
     expect(response.status).to.equal(404);
+    expect(response.body).to.include({ msg: 'Error al buscar la transacción' });
   });
 
 });
 
 describe('PATCH /transactions', () => {
-  it('should update a transaction by id', async () => {
+  it('Debería actualizar una transacción a partir del id', async () => {
     const response = await request(app).patch('/transactions/2').send({
       importe_: 10,
     });
     expect(response.status).to.equal(200);
+    expect(response.body).to.have.property('importe_');
   });
-  it('should return 404 if the transaction is not found', async () => {
+  it('Debería devolver un error 404 si no se encuentra la transacción', async () => {
     const response = await request(app).patch('/transactions/999');
     expect(response.status).to.equal(404);
+    expect(response.body).to.include({ msg: 'Transacción no encontrada' });
   });
-  it('should return 500 if the request is invalid', async () => {
+  it('Debería actualizar una transacción a partir del id', async () => {
     const response = await request(app).patch('/transactions/2').send({
       muebles_: [{ muebleId: 'segunda silla inicial', cantidad: 1}]
     });
     expect(response.status).to.equal(200);
+    expect(response.body).to.have.property('muebles_');
+  });
+});
+
+describe('Average /transactions', () => {
+  it('debería devolver todas las transacciones', async () => {
+    const response = await request(app).get('/transactions/balance');
+    expect(response.status).to.equal(200);
+    expect(response.body).to.have.property('balance');
   });
 });
 
@@ -153,12 +171,13 @@ describe('DELETE /transactions', () => {
     await sillaModel.deleteMany();
     await transaccionModel.deleteMany();
   });
-  it('should delete a transaction by id', async () => {
+  it('Debería eliminar una transacción por id', async () => {
     const response = await request(app).delete('/transactions/2');
     expect(response.status).to.equal(200);
   });
-  it('should return 404 if the transaction is not found', async () => {
+  it('Debería devolver un error 404 si no se encuentra la transacción', async () => {
     const response = await request(app).delete('/transactions/999');
     expect(response.status).to.equal(404);
   });
 });
+
