@@ -1,4 +1,4 @@
-name: Coveralls
+name: Tests
 
 on:
   push:
@@ -11,28 +11,28 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 19.x, 20.x, 21.x]
+        mongodb-version: ['5.0', '6.0', '7.0']
+
     steps:
     - name: Git checkout
       uses: actions/checkout@v4
 
-    - name: Use Node.js 21.x
+    - name: Use Node.js $
       uses: actions/setup-node@v4
       with:
-        node-version: 21.x
+        node-version: $
         cache: 'npm'
 
-    - name: Start MongoDB 7.0
+    - name: Start MongoDB
       uses: supercharge/mongodb-github-action@1.10.0
       with:
-        mongodb-version: '7.0'
+        mongodb-version: $
 
     - name: Install dependencies 
       run: npm ci
     
-    - name: Generate coverage info
-      run: npm run coverage 
-
-    - name: Coveralls
-      uses: coverallsapp/github-action@v2.2.3
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Running tests
+      run: npm test
