@@ -29,42 +29,39 @@
   "license": "ISC",
   "type": "module",
   "scripts": {
-    "start": "node ./dist/index.js",
-    "test": "env-cmd -f ./config/test.env mocha --exit",
-    "coverage": "c8 npm test && c8 report --reporter=lcov",
-    "doc": "typedoc",
     "server": "tsc && node dist/ArchivosNuevos/serverExpress.js &",
     "git": "git add . && git commit -m \"Updates\" && git push",
+    "build": "tsc",
+    "start": "node dist/index.js",
     "dev": "tsc-watch --onSuccess \"env-cmd -f ./config/dev.env node dist/index.js\"",
-    "build": "tsc" 
+    "doc": "typedoc",
+    "test": "env-cmd -f ./config/test.env mocha --exit",
+    "coverage": "c8 npm test && c8 report --reporter=lcov"
   },
   "devDependencies": {
-    "@types/chai": "^4.3.12",
+    "@types/chai": "^4.3.14",
     "@types/express": "^4.17.21",
     "@types/mocha": "^10.0.6",
-    "@types/node": "^20.11.24",
-    "@types/request": "^2.48.12",
     "@types/supertest": "^6.0.2",
     "@types/validator": "^13.11.9",
-    "@typescript-eslint/eslint-plugin": "^7.1.1",
-    "@typescript-eslint/parser": "^7.1.1",
+    "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "@typescript-eslint/parser": "^7.8.0",
     "c8": "^9.1.0",
     "chai": "^5.1.0",
     "env-cmd": "^10.1.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
-    "mocha": "^10.3.0",
+    "mocha": "^10.4.0",
     "prettier": "^3.2.5",
     "supertest": "^7.0.0",
     "ts-node": "^10.9.2",
-    "tsc-watch": "^6.0.4",
-    "typedoc": "^0.25.11",
-    "validator": "^13.11.0"
+    "tsc-watch": "^6.2.0",
+    "typedoc": "^0.25.13",
+    "typescript": "^5.4.5"
   },
   "dependencies": {
-    "typescript": "^5.3.3",
-    "chalk": "^5.3.0",
     "express": "^4.19.2",
-    "mongoose": "^8.3.2"
+    "mongoose": "^8.3.2",
+    "validator": "^13.11.0"
   }
 }

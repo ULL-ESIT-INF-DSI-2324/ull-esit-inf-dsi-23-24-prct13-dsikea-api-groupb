@@ -20,8 +20,6 @@ jobs:
         node-version: 21.x
     - name: Installing dependencies
       run: npm install
-    - name: Set up the server
-      run: npm run server
     - name: Generating coverage information
       run: npm run coverage
     - name: Coveralls GitHub Action
