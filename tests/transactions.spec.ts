@@ -2,7 +2,7 @@ import request from 'supertest';
 import { app } from '../src/index.js';
 import { expect } from 'chai';
 import { describe, it, before } from 'mocha';
-import { transaccionModel } from '../src/models/transacciones/transaccion.js';
+// import { transaccionModel } from '../src/models/transacciones/transaccion.js';
 import { sillaModel } from '../src/models/muebles/silla.js';
 import { clienteModel } from '../src/models/personas/cliente.js';
 
@@ -124,7 +124,6 @@ describe('GET /transactions', () => {
   after(async () => {
     await clienteModel.deleteMany();
     await sillaModel.deleteMany();
-    await transaccionModel.deleteMany();
   });
   it('should return all transactions', async () => {
     const response = await request(app).get('/transactions');
@@ -181,23 +180,22 @@ describe('GET /transactions', () => {
 //   });
 // });
 
-// describe('DELETE /transactions', () => {
-//   before(async () => {
-//     await new clienteModel(primerCliente).save();
-//     await new sillaModel(primeraSilla).save();
-//     await new sillaModel(segundaSilla).save();
-//   });
-//   after(async () => {
-//     await clienteModel.deleteMany();
-//     await transaccionModel.deleteMany();
-//     await sillaModel.deleteMany();
-//   });
-//   it('should delete a transaction by id', async () => {
-//     const response = await request(app).delete('/transactions/1');
-//     expect(response.status).to.equal(200);
-//   });
-//   it('should return 404 if the transaction is not found', async () => {
-//     const response = await request(app).delete('/transactions/999');
-//     expect(response.status).to.equal(404);
-//   });
-// });
+describe('DELETE /transactions', () => {
+  before(async () => {
+    await new clienteModel(primerCliente).save();
+    await new sillaModel(primeraSilla).save();
+    await new sillaModel(segundaSilla).save();
+  });
+  after(async () => {
+    await clienteModel.deleteMany();
+    await sillaModel.deleteMany();
+  });
+  it('should delete a transaction by id', async () => {
+    const response = await request(app).delete('/transactions/1');
+    expect(response.status).to.equal(200);
+  });
+  // it('should return 404 if the transaction is not found', async () => {
+  //   const response = await request(app).delete('/transactions/999');
+  //   expect(response.status).to.equal(404);
+  // });
+});

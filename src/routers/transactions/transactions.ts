@@ -80,9 +80,9 @@ transaccionRouter.patch('/transactions/:id', async (req, res) => {
           throw new Error('El mueble no existe');
         }
         // Se calcula la diferencia entre la cantidad de muebles de la transacción anterior, y la cantidad de muebles de la transacción actual
-        let muebleEnTransaccion = transaccionAModificar.muebles_.find((m: any) => m.muebleId.equals(muebleEncontrado._id));
+        let muebleEnTransaccion = transaccionAModificar.muebles_.find((m: any) => m.muebleId.equals(muebleEncontrado!._id));
         let diferencia = mueble.cantidad - muebleEnTransaccion.cantidad;
-        console.log(`Básicamente ${mueble.cantidad} - ${transaccionAModificar.muebles_.find((m: any) => m.muebleId.equals(muebleEncontrado._id)).cantidad} = ${diferencia}`);
+        console.log(`Básicamente ${mueble.cantidad} - ${transaccionAModificar.muebles_.find((m: any) => m.muebleId.equals(muebleEncontrado!._id)).cantidad} = ${diferencia}`);
         // Se tienen en cuenta
         if (transaccionAModificar.tipo_ === 'venta') {
           diferencia > 0 ? muebleEnTransaccion.cantidad += diferencia : muebleEnTransaccion.cantidad -= Math.abs(diferencia);
