@@ -19,8 +19,6 @@ import { transactionsModels } from '../../auxFiles/getModels.js';
 
 // Declaración del router
 export const transaccionRouter = Express.Router();
-// let modelsPost: any[] = [compraModel, ventaModel];
-
 
 /**
  * Busca una transacción en la base de datos haciendo uso de la QueryString
@@ -115,9 +113,11 @@ transaccionRouter.patch('/transactions/:id', async (req, res) => {
           }
         }
         transaccionAModificar.save();
-        res.status(200).send(transaccionAModificar);
       }
+    } else {
+      await transactionsModels[0].findOneAndUpdate({id_:req.params.id}, req.body);
     }
+    res.status(transaccionAModificar ? 200: 404).send(transaccionAModificar ?? {msg: 'Transacción no encontrada'});
   } catch (error) {
     let customError = error as Error;
     res.status(500).send({ msg: 'Error al actualizar la transacción', error: customError.message });
@@ -134,16 +134,33 @@ transaccionRouter.delete('/transactions/:id', async (req, res) => {
   try {
     let transaccionesEliminadas: TransaccionDocumentInterface[] = [];
     for (const model of transactionsModels) {
-      let result = await model.deleteMany({ id_: req.params.id });
-      if (!result) { continue }
       // Iteramos sobre los muebles de la transacción que eliminamos para devolverlos al stock
-      await actualizarStock(result, req);
-      transaccionesEliminadas.push(result);
-      model.save();
+      let transaccion = await model.findOne({ id_: req.params.id });
+      if (!transaccion) { continue; }
+      await actualizarStock(transaccion, req);
+      let result = await model.deleteMany({ id_: req.params.id });
+      if (result.deletedCount === 0) { continue; }
+      transaccionesEliminadas.push(transaccion);
     }
-    res.status(200).send(transaccionesEliminadas);
+    res.status(transaccionesEliminadas.length === 0 ? 404 : 200).send(transaccionesEliminadas.length === 0 ? {msg: 'Transacción no encontrada.'} : transaccionesEliminadas);
   } catch (error) {
     res.status(500).send({ msg: 'Error al eliminar la transacción', error: error });
   }
 });
 
+
+transaccionRouter.delete('/transactions/balance', async (_, res) => {
+  try {
+    let transactions = transactionsModels[0].find();
+    if (transactions === undefined) { 
+      res.status(404).send({msg: 'No hay transacciones disponibles'}) 
+    }
+    let sum : number = 0;
+    for (const t of transactions) {
+      sum += t.importe_;
+    }
+    res.status(200).send({balance: sum / transactions.length});
+  } catch (error) {
+    res.status(500).send({ msg: 'Error al eliminar la transacción', error: error });
+  }
+});

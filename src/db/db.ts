@@ -9,22 +9,10 @@
  */
 import { connect } from 'mongoose';
 
-/*// Connect to Database
-export let iniciarDB = () => {
-  // TODO: Añadir proceso que ejecute en segundo plano el la base de datos si da tiempo
-  connect('mongodb://127.0.0.1:27017/DSIkea').then(() => {
-    console.log('Connected to the database');
-  }).catch(() => {
-    console.log('Something went wrong when conecting to the database');
-    process.exit(-1);
-  });
-}*/
-
-
 // Connect to Database
 export let iniciarDB = () => {
   // TODO: Añadir proceso que ejecute en segundo plano el la base de datos si da tiempo
-  connect('mongodb://127.0.0.1:27017/DSIkea').then(() => {
+  connect(process.env.MONGODB_URL!).then(() => {
     console.log('Connected to the database');
   }).catch(() => {
     console.log('Something went wrong when conecting to the database');

@@ -5,6 +5,7 @@ import { describe, it, before } from 'mocha';
 // import { transaccionModel } from '../src/models/transacciones/transaccion.js';
 import { sillaModel } from '../src/models/muebles/silla.js';
 import { clienteModel } from '../src/models/personas/cliente.js';
+import { transaccionModel } from '../src/models/transacciones/transaccion.js';
 
 //Base de Datos inicial
 const primeraSilla = {
@@ -52,17 +53,11 @@ const primerCliente = {
 };
 
 
-
-
 describe('POST /transactions', () => {
   before(async () => {
     await new clienteModel(primerCliente).save();
     await new sillaModel(primeraSilla).save();
     await new sillaModel(segundaSilla).save();
-  });
-  after(async () => {
-    await clienteModel.deleteMany();
-    await sillaModel.deleteMany();
   });
   it('should create a new transaction', async () => {
     const response = await request(app).post('/transactions').send({
@@ -116,15 +111,6 @@ describe('POST /transactions', () => {
 });
 
 describe('GET /transactions', () => {
-  before(async () => {
-    await new clienteModel(primerCliente).save();
-    await new sillaModel(primeraSilla).save();
-    await new sillaModel(segundaSilla).save();
-  });
-  after(async () => {
-    await clienteModel.deleteMany();
-    await sillaModel.deleteMany();
-  });
   it('should return all transactions', async () => {
     const response = await request(app).get('/transactions');
     expect(response.status).to.equal(200);
@@ -142,60 +128,37 @@ describe('GET /transactions', () => {
 
 });
 
-// describe('PATCH /transactions', () => {
-//   before(async () => {
-//     await new clienteModel(primerCliente).save();
-//     await new sillaModel(primeraSilla).save();
-//     await new sillaModel(segundaSilla).save();
-//   });
-//   after(async () => {
-//     await clienteModel.deleteMany();
-//     await transaccionModel.deleteMany();
-//     await sillaModel.deleteMany();
-//   });
-//   it('should update a transaction by id', async () => {
-//     const response = await request(app).patch('/transactions/1').send({
-//       fechainicio_: "02/02/2023",
-//       fechafin_: "03/03/2024",
-//       importe_: 10,
-//       muebles_: [{ "muebleId": "silla chula", "cantidad": 1 }],
-//       persona_: "79097084A",
-//       tipo_: "venta"
-//     });
-//     expect(response.status).to.equal(200);
-//   });
-//   it('should return 404 if the transaction is not found', async () => {
-//     const response = await request(app).patch('/transactions/999');
-//     expect(response.status).to.equal(404);
-//   });
-//   it('should return 500 if the request is invalid', async () => {
-//     const response = await request(app).patch('/transactions/1').send({
-//       fechainicio_: "02/02/2023",
-//       fechafin_: "03/03/2024",
-//       importe_: 10,
-//       persona_: "99097084A",
-//       tipo_: "venta"
-//     });
-//     expect(response.status).to.equal(500);
-//   });
-// });
+describe('PATCH /transactions', () => {
+  it('should update a transaction by id', async () => {
+    const response = await request(app).patch('/transactions/2').send({
+      importe_: 10,
+    });
+    expect(response.status).to.equal(200);
+  });
+  it('should return 404 if the transaction is not found', async () => {
+    const response = await request(app).patch('/transactions/999');
+    expect(response.status).to.equal(404);
+  });
+  it('should return 500 if the request is invalid', async () => {
+    const response = await request(app).patch('/transactions/2').send({
+      muebles_: [{ muebleId: 'segunda silla inicial', cantidad: 1}]
+    });
+    expect(response.status).to.equal(200);
+  });
+});
 
 describe('DELETE /transactions', () => {
-  before(async () => {
-    await new clienteModel(primerCliente).save();
-    await new sillaModel(primeraSilla).save();
-    await new sillaModel(segundaSilla).save();
-  });
   after(async () => {
     await clienteModel.deleteMany();
     await sillaModel.deleteMany();
+    await transaccionModel.deleteMany();
   });
   it('should delete a transaction by id', async () => {
-    const response = await request(app).delete('/transactions/1');
+    const response = await request(app).delete('/transactions/2');
     expect(response.status).to.equal(200);
   });
-  // it('should return 404 if the transaction is not found', async () => {
-  //   const response = await request(app).delete('/transactions/999');
-  //   expect(response.status).to.equal(404);
-  // });
+  it('should return 404 if the transaction is not found', async () => {
+    const response = await request(app).delete('/transactions/999');
+    expect(response.status).to.equal(404);
+  });
 });
