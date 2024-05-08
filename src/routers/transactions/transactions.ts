@@ -24,7 +24,7 @@ export const transaccionRouter = Express.Router();
 transaccionRouter.get('/transactions/balance', async (_, res) => {
   try {
     let transactions: TransaccionDocumentInterface[] = await transactionsModels[0].find({});
-    if (transactions === undefined) { 
+    if (!transactions || !transactions.length) { 
       res.status(404).send({msg: 'No hay transacciones disponibles'}) 
     }
     let sum : number = 0;

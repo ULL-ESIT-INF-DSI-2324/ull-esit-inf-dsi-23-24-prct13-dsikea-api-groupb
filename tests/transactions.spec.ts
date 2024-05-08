@@ -76,9 +76,13 @@ describe('POST /transactions', () => {
     expect(response.body).to.have.property('muebles_');
     expect(response.body).to.have.property('persona_');
     expect(response.body).to.have.property('tipo_');
+    // que queden en stock un mueble (3-2)
+    const response2 = await request(app).get('/furnitures/1');
+    expect(response2.body[0].cantidad_).to.deep.equal(1);
+   
   });
 
-  it('Debería crear una transacción nueva', async () => {
+  it('Debería crear una transacción nueva 2', async () => {
     const response = await request(app).post('/transactions').send({
       id_: 2,
       fechainicio_: "02/02/2023",
@@ -95,6 +99,9 @@ describe('POST /transactions', () => {
     expect(response.body).to.have.property('muebles_');
     expect(response.body).to.have.property('persona_');
     expect(response.body).to.have.property('tipo_');
+    //que queden en stock dos
+    const response2 = await request(app).get('/furnitures/2');
+    expect(response2.body[0].cantidad_).to.deep.equal(4);
   });
 
   it('Debería retornar 500 si la petición no es válida', async () => {
@@ -137,7 +144,7 @@ describe('GET /transactions', () => {
 
 describe('PATCH /transactions', () => {
   it('Debería actualizar una transacción a partir del id', async () => {
-    const response = await request(app).patch('/transactions/2').send({
+    const response = await request(app).patch('/transactions/1').send({
       importe_: 10,
     });
     expect(response.status).to.equal(200);
@@ -174,10 +181,20 @@ describe('DELETE /transactions', () => {
   it('Debería eliminar una transacción por id', async () => {
     const response = await request(app).delete('/transactions/2');
     expect(response.status).to.equal(200);
+    // es una devolución, se actualiza la cantidad del mueble
+    const response2 = await request(app).get('/furnitures/2');
+    expect(response2.body[0].cantidad_).to.deep.equal(3);
   });
   it('Debería devolver un error 404 si no se encuentra la transacción', async () => {
     const response = await request(app).delete('/transactions/999');
     expect(response.status).to.equal(404);
+  });
+
+  it('Debería devolver un error 404 si no encuentra transacciones', async () => {
+    await transaccionModel.deleteMany();
+    const response2 = await request(app).get('/transactions/balance');
+    expect(response2.status).to.equal(404);
+    expect(response2.body).to.include({msg : 'No hay transacciones disponibles'});
   });
 });
 

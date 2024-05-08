@@ -91,11 +91,11 @@ export async function parseData(req: request) {
     const idMueble = await muebleModel.findOne({ nombre_: mueble.muebleId });
     if (!idMueble) { continue; }
     // Si la transacción es de venta y no hay suficientes unidades en stock, se lanza un error
-    if (idMueble.cantidad_ < mueble.cantidad) {
+    if (req.body.tipo_ === 'venta' && idMueble.cantidad_ < mueble.cantidad) {
       throw new Error(`No hay suficientes unidades de ${mueble.muebleId} en stock`);
     }
     // Actualizar cantidad de muebles y calcular importe total
-    await muebleModel.findOneAndUpdate({ _id: idMueble._id }, { cantidad_: idMueble.cantidad_ - mueble.cantidad });
+    await muebleModel.findOneAndUpdate({ _id: idMueble._id }, { cantidad_: req.body.tipo_ === 'venta' ? idMueble.cantidad_ - mueble.cantidad : idMueble.cantidad_ + mueble.cantidad });
     importeTotal += idMueble.precio_ * mueble.cantidad;
     mueblesCambiados.push({ muebleId: idMueble?._id.toString(), cantidad: mueble.cantidad });
   }
