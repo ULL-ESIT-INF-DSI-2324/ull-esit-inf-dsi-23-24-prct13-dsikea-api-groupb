@@ -15,7 +15,7 @@
 # 1. 📚 Introducción 📚
 
 El propósito de este informe es detallar los procedimientos llevados a cabo en el transcurso de la práctica número 13 del curso de **Desarrollo de Sistemas Informáticos**.
-
+ 
 # 2. 🧠 Trabajo previo 🧠
 
 Para la realización de esta práctica, se han realizado las siguientes tareas como trabajo previo:
