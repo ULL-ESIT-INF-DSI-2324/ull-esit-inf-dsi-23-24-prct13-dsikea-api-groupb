@@ -10,11 +10,10 @@
 import Express from 'express';
 import { Schema } from 'mongoose';
 import { TransaccionDocumentInterface } from '../../models/transacciones/transaccion.js';
-import { PersonaDocumentInterface } from '../../models/personas/persona.js';
+import { PersonaDocumentInterface, personaModel } from '../../models/personas/persona.js';
 
 // Importación de modelos
 import { transactionsModels } from '../../auxFiles/getModels.js';
-import { personaModel } from '../../models/personas/persona.js';
 import { muebleModel } from '../../models/muebles/mueble.js';
 
 type request = Express.Request<any>;

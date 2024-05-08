@@ -8,7 +8,6 @@ import { transaccionRouter } from './routers/transactions/transactions.js';
 
 // Initialize the express server
 export const app = express();
-//const port = process.env.PORT;
 app.use(express.json());
 app.use(furnitureRouter);
 app.use(providersRouter);

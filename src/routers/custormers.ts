@@ -22,7 +22,6 @@ export const customersRouter = Express.Router();
  */
 customersRouter.get('/customers', async (req, res) => {
   req.query = { ...req.query };
-  // console.log(req.query);
   try {
     let clientesEncontrados: PersonaDocumentInterface[] = [await clienteModel.find(req.query)];
     clientesEncontrados = clientesEncontrados.flat().filter(x => x !== null);
