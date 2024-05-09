@@ -225,6 +225,220 @@ En esta fase, se ha implementado el servidor utilizando Express para replicar la
     export const sillaModel = muebleModel.discriminator('Sillas', SillaSchema);
     ```
 
+  * **persona.ts**: Define un modelo y un esquema para una colección de personas en una base de datos MongoDB utilizando Mongoose.
+
+    1. Interfaz PersonaDocumentInterface: Define la estructura de un documento de la colección de Personas, especificando propiedades como id, nombre, contacto y dirección.
+    2. Esquema PersonaSchema: Define la estructura completa de un documento de la colección de Personas. Cada campo del esquema especifica el tipo de datos, si es único y requerido, y contiene funciones de validación para asegurar la integridad de los datos ingresados.
+    3. Modelo personaModel: Exporta el modelo de Mongoose para la colección de Personas, utilizando el esquema definido previamente. Este modelo se registra en la base de datos con el nombre "Personas".
+
+    ```ts
+    export interface PersonaDocumentInterface extends Document {
+      id_: string,
+      nombre_: string,
+      contacto_: number,
+      direccion_: string
+    }
+    
+    const PersonaSchema = new Schema<PersonaDocumentInterface>({
+      id_: {
+        type: String,
+        unique: true,
+        required: true,
+        validate: (value: string) => {
+          if (value.length === 0) {
+            throw new Error('El ID de una persona no puede ser vacío.');
+          }
+          if (value.length !== 9) {
+            throw new Error('El ID de una persona debe tener 9 caracteres.');
+          }
+          if (!/^\d{8}\w{1}$/.test(value)) {
+            throw new Error('El ID de una persona debe tener un formato válido: [8 dígitos][1 letras mayúsculas].');
+          }
+        }
+      },
+      nombre_: {
+        type: String,
+        required: true,
+        validate: (value: string) => {
+          if (value.length === 0) {
+            throw new Error('El nombre de una persona no puede ser vacío.');
+          }
+          if (/\d/.test(value)) {
+            throw new Error('El nombre de una persona no puede contener números.');
+          }
+          if (!/^[A-Z]/.test(value)) {
+            throw new Error('El nombre de una persona debe empezar por mayúscula.');
+          }
+        } 
+      },
+      contacto_: {
+        type: Number,
+        required: true,
+        validate: (value: number) => {
+          if (value < 0) {
+            throw new Error('El contacto de una persona no puede ser negativo.');
+          }
+          if (value % 1 !== 0) {
+            throw new Error('El contacto de una persona no puede ser un número decimal.');
+          }
+          if (value.toString().length !== 9) {
+            throw new Error('El contacto de una persona debe tener 9 dígitos.');
+          }
+          if (!/^[6-9]/.test(value.toString())) {
+            throw new Error('El contacto de una persona debe empezar por 6,7,8 9.');
+          }
+        }
+      },
+      direccion_: {
+        type: String,
+        required: true,
+        validate: (value: string) => {
+          if (value.length === 0) {
+            throw new Error('La dirección de una persona no puede ser vacía.');
+          }
+          if (!/^[a-zA-Z0-9\s]+,[0-9]+(,[0-9]*){0,2}$/.test(value)) {
+            throw new Error('La dirección de una persona debe tener un formato válido: [nombre de la calle],[número de la casa], [piso], [puerta].');
+          }
+        }
+      }
+    });
+    
+    export const personaModel = model<PersonaDocumentInterface>('Personas', PersonaSchema);
+    ```
+
+  * **proveedor.ts, cliente.ts**: Los modelos de Proveedores y Clientes se basan en una estructura común representada por la interfaz PersonaDocumentInterface, heredando propiedades como id, nombre, contacto y dirección. Cada uno utiliza un esquema (ProveedorSchema y ClienteSchema) que, aunque vacío en este caso, aprovecha las validaciones y tipos de datos definidos en el esquema de personas. Además, se utilizan discriminadores en Mongoose para crear los modelos (proveedorModel y clienteModel) basados en el modelo principal de personas, permitiendo una gestión modular y coherente de diferentes tipos de entidades en la base de datos.
+
+    > Código de Ejemplo: cliente.ts
+
+    ```ts
+    export interface ClienteDocumentInterface extends PersonaDocumentInterface {
+    }
+
+    const ClienteSchema = new Schema<ClienteDocumentInterface>({});
+    
+    export const clienteModel = personaModel.discriminator('Clientes', ClienteSchema);
+    ```
+
+  * **transaccion.ts**: Define un modelo y un esquema para una colección de transacciones en una base de datos MongoDB utilizando Mongoose.
+
+    1. Interfaz TransaccionDocumentInterface: Define la estructura de un documento de la colección de Transacciones, especificando propiedades como id, fechas de inicio y fin, importe, muebles involucrados, persona asociada y tipo de transacción.
+    2. Esquema MuebleSchema: Define la estructura para representar un mueble en una transacción, con propiedades para el id del mueble y la cantidad involucrada.
+    3. Esquema TransaccionSchema: Define la estructura completa de un documento de la colección de Transacciones. Cada campo del esquema especifica el tipo de datos, si es único y requerido, y contiene funciones de validación para asegurar la integridad de los datos ingresados. El campo muebles_ utiliza el esquema MuebleSchema para representar una lista de muebles involucrados en la transacción. El campo persona_ se refiere a una persona asociada con la transacción, validando que el id de la persona exista en la base de datos.
+
+    ```ts
+    export interface TransaccionDocumentInterface extends Document {
+      id_: number,
+      fechainicio_: Date,
+      fechafin_: Date,
+      importe_: number,
+      muebles_: {
+        muebleId: Schema.Types.ObjectId,
+        cantidad: number,
+      }[],
+      persona_: Schema.Types.ObjectId,
+      tipo_ : string
+    }
+    
+    const MuebleSchema = new Schema({
+      muebleId: Schema.Types.ObjectId,
+      cantidad: Number,
+    });
+    
+    const TransaccionSchema = new Schema<TransaccionDocumentInterface>({
+      id_: {
+        type: Number,
+        unique: true,
+        required: true,
+        validate: (value: number) => {
+          if (value < 0) {
+            throw new Error('El id de una transacción no puede ser negativo.');
+          }
+          if (value % 1 !== 0) {
+            throw new Error('El id de una transacción no puede ser un número decimal.');
+          }
+        }
+      },
+      fechainicio_: {
+        type: Date,
+        required: true,
+        validate: (value: Date) => {
+          if (value > new Date()) {
+            throw new Error('La fecha de una transacción no puede ser futura.');
+          }
+          if (value < new Date('2020-01-01')) {
+            throw new Error('La fecha de una transacción no puede ser anterior a 2020.');
+          }
+          if (value === new Date('Invalid Date')) {
+            throw new Error('La fecha de una transacción no puede ser inválida.');
+          }    
+        }
+      },
+      fechafin_: {
+        type: Date,
+        required: true,
+        validate: (value: Date) => {
+          if (value > new Date()) {
+            throw new Error('La fecha de una transacción no puede ser futura.');
+          }
+          if (value < new Date('2020-01-01')) {
+            throw new Error('La fecha de una transacción no puede ser anterior a 2020.');
+          }
+          if (value === new Date('Invalid Date')) {
+            throw new Error('La fecha de una transacción no puede ser inválida.');
+          }
+        }
+      },
+      importe_: {
+        type: Number,
+        validate: (value: number) => {
+          if (value < 0) {
+            throw new Error('El importe de una transacción no puede ser negativo.');
+          }
+        }
+      },
+      muebles_: {
+        type: [MuebleSchema],
+        required: true,
+        _id: false
+      },
+      persona_: {
+        type: Schema.Types.ObjectId,
+        ref: 'Personas',
+        required: true,
+        validate: {
+          validator: async function(value: Schema.Types.ObjectId) {
+            // Busca la persona en la base de datos
+            const persona = await personaModel.findById(value);
+            // Devuelve true si la persona existe, false si no
+            return !!persona;
+          },
+          message: props => `La persona asociada con ID ${props.value} no existe en la base de datos.`
+        }
+      },
+      tipo_: {
+        type: String,
+        // enum: ['Compra', 'Venta', 'Devolución'],
+        required: true
+      }
+    });
+    
+    export const transaccionModel = model<TransaccionDocumentInterface>('Transacciones', TransaccionSchema);
+    ```
+
+  * **venta.ts, devolucion.ts, compra.ts**: Los modelos de Ventas, Devoluciones y Compras se fundamentan en una estructura común definida por la interfaz TransaccionDocumentInterface, compartiendo propiedades como id, fechas de inicio y fin, importe, muebles involucrados, persona asociada y tipo de transacción. Cada uno emplea un esquema (VentaSchema, DevolucionSchema y CompraSchema) que, aunque inicialmente vacío, se apoya en las validaciones y tipos de datos establecidos en el esquema de transacciones. Además, se aplican discriminadores en Mongoose para instanciar los modelos (ventaModel, devolucionModel y compraModel) derivados del modelo principal de transacciones, lo que facilita una gestión modular y uniforme de distintos tipos de transacciones en la base de datos.
+
+    > Código de Ejemplo: compra.ts
+
+    ```ts
+    export interface CompraInterfaceDocument extends TransaccionDocumentInterface {
+    }
+    
+    const CompraSchema = new Schema<CompraInterfaceDocument>({});
+    
+    export const compraModel = transaccionModel.discriminator('Compras', CompraSchema);
+    ```
+
+
 # 4. Conclusiones
 
 Tras la realización de la práctica, se han aprendido las nociones básicas para el manejo del Framework Express, así como la integración con MongoDB y Mongoose para la gestión de la base de datos. Se ha logrado comprender cómo implementar un servidor API REST utilizando Express y cómo interactuar con la base de datos no relacional MongoDB mediante Mongoose.
