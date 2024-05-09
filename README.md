@@ -1,4 +1,7 @@
-- Autores: **Omar Suárez Doro - alu0101483474@ull.edu.es ; Antonio Ramos Castilla - alu0101480367@ull.edu.es ; Ithaisa Morales Arbelo - alu0101482194@ull.edu.es**
+- Autores:
+  * **Omar Suárez Doro - alu0101483474@ull.edu.es**
+  * **Antonio Ramos Castilla - alu0101480367@ull.edu.es**
+  * **Ithaisa Morales Arbelo - alu0101482194@ull.edu.es**
 
 - Asignatura: **Desarrollo de Sistemas Informáticos**
   
@@ -61,10 +64,10 @@ En esta fase, se ha implementado el servidor utilizando Express para replicar la
 
   * **mueble.ts**: Se proporciona una definición de esquema y un modelo para interactuar con una colección de muebles en una base de datos MongoDB utilizando Mongoose.
 
-      1. Tipo Dimension: Define una estructura para representar las dimensiones de un mueble, incluyendo alto, ancho y largo.
-      2. Interfaz MuebleDocumentInterface: Define la estructura de un documento de la colección de Muebles, especificando las propiedades esperadas como id, tipo, nombre, etc.
-      3. Esquema DimensionSchema: Define la estructura del subdocumento para las dimensiones de un mueble, utilizando el tipo definido previamente y los tipos de datos proporcionados por Mongoose.
-      4. Esquema MuebleSchema: Define la estructura completa de un documento de la colección de Muebles, con campos como id, nombre, material, etc. Se aplican validaciones y restricciones a cada campo.
+      1. **Tipo Dimension:** Define una estructura para representar las dimensiones de un mueble, incluyendo alto, ancho y largo.
+      2. **Interfaz MuebleDocumentInterface:** Define la estructura de un documento de la colección de Muebles, especificando las propiedades esperadas como id, tipo, nombre, etc.
+      3. **Esquema DimensionSchema:** Define la estructura del subdocumento para las dimensiones de un mueble, utilizando el tipo definido previamente y los tipos de datos proporcionados por Mongoose.
+      4. **Esquema MuebleSchema:** Define la estructura completa de un documento de la colección de Muebles, con campos como id, nombre, material, etc. Se aplican validaciones y restricciones a cada campo.
    
       ```ts
       type Dimension = {
@@ -225,9 +228,9 @@ En esta fase, se ha implementado el servidor utilizando Express para replicar la
 
   * **persona.ts**: Define un modelo y un esquema para una colección de personas en una base de datos MongoDB utilizando Mongoose.
 
-    1. Interfaz PersonaDocumentInterface: Define la estructura de un documento de la colección de Personas, especificando propiedades como id, nombre, contacto y dirección.
-    2. Esquema PersonaSchema: Define la estructura completa de un documento de la colección de Personas. Cada campo del esquema especifica el tipo de datos, si es único y requerido, y contiene funciones de validación para asegurar la integridad de los datos ingresados.
-    3. Modelo personaModel: Exporta el modelo de Mongoose para la colección de Personas, utilizando el esquema definido previamente. Este modelo se registra en la base de datos con el nombre "Personas".
+    1. **Interfaz PersonaDocumentInterface:** Define la estructura de un documento de la colección de Personas, especificando propiedades como id, nombre, contacto y dirección.
+    2. **Esquema PersonaSchema:** Define la estructura completa de un documento de la colección de Personas. Cada campo del esquema especifica el tipo de datos, si es único y requerido, y contiene funciones de validación para asegurar la integridad de los datos ingresados.
+    3. **Modelo personaModel:** Exporta el modelo de Mongoose para la colección de Personas, utilizando el esquema definido previamente. Este modelo se registra en la base de datos con el nombre "Personas".
 
     ```ts
     export interface PersonaDocumentInterface extends Document {
@@ -319,9 +322,9 @@ En esta fase, se ha implementado el servidor utilizando Express para replicar la
 
   * **transaccion.ts**: Define un modelo y un esquema para una colección de transacciones en una base de datos MongoDB utilizando Mongoose.
 
-    1. Interfaz TransaccionDocumentInterface: Define la estructura de un documento de la colección de Transacciones, especificando propiedades como id, fechas de inicio y fin, importe, muebles involucrados, persona asociada y tipo de transacción.
-    2. Esquema MuebleSchema: Define la estructura para representar un mueble en una transacción, con propiedades para el id del mueble y la cantidad involucrada.
-    3. Esquema TransaccionSchema: Define la estructura completa de un documento de la colección de Transacciones. Cada campo del esquema especifica el tipo de datos, si es único y requerido, y contiene funciones de validación para asegurar la integridad de los datos ingresados. El campo muebles_ utiliza el esquema MuebleSchema para representar una lista de muebles involucrados en la transacción. El campo persona_ se refiere a una persona asociada con la transacción, validando que el id de la persona exista en la base de datos.
+    1. **Interfaz TransaccionDocumentInterface:** Define la estructura de un documento de la colección de Transacciones, especificando propiedades como id, fechas de inicio y fin, importe, muebles involucrados, persona asociada y tipo de transacción.
+    2. **Esquema MuebleSchema:** Define la estructura para representar un mueble en una transacción, con propiedades para el id del mueble y la cantidad involucrada.
+    3. **Esquema TransaccionSchema:** Define la estructura completa de un documento de la colección de Transacciones. Cada campo del esquema especifica el tipo de datos, si es único y requerido, y contiene funciones de validación para asegurar la integridad de los datos ingresados. El campo muebles_ utiliza el esquema MuebleSchema para representar una lista de muebles involucrados en la transacción. El campo persona_ se refiere a una persona asociada con la transacción, validando que el id de la persona exista en la base de datos.
 
     ```ts
     export interface TransaccionDocumentInterface extends Document {
@@ -438,13 +441,13 @@ En esta fase, se ha implementado el servidor utilizando Express para replicar la
 
 * **customers.ts**: Define operaciones CRUD (Crear, Leer, Actualizar, Eliminar) para la gestión de clientes en una API REST utilizando Express y Mongoose.
 
-    1. Operación GET /customers: Busca clientes en la base de datos utilizando los parámetros de la QueryString. Devuelve un objeto JSON con los clientes encontrados o un mensaje de error si no se encuentran.
-    2. Operación GET /customers/:id: Busca un cliente en la base de datos utilizando su ID dinámicamente. Retorna un objeto JSON con el cliente encontrado o un mensaje de error si no se encuentra.
-    3. Operación POST /customers: Guarda un nuevo cliente en la base de datos. Espera recibir los datos del cliente en el cuerpo de la solicitud y devuelve el cliente guardado como objeto JSON, o un mensaje de error si ocurre algún problema.
-    4. Operación PATCH /customers: Actualiza clientes en la base de datos utilizando los parámetros de la QueryString como filtros. Devuelve el cliente actualizado como objeto JSON o un mensaje de error si no se encuentra.
-    5. Operación PATCH /customers/:id: Actualiza un cliente en la base de datos utilizando su ID dinámicamente. Retorna el cliente actualizado como objeto JSON o un mensaje de error si no se encuentra.
-    6. Operación DELETE /customers: Elimina clientes de la base de datos utilizando los parámetros de la QueryString como filtros. Devuelve el cliente eliminado como objeto JSON o un mensaje de error si no se encuentra.
-    7. Operación DELETE /customers/:id: Elimina un cliente de la base de datos utilizando su ID dinámicamente. Retorna el cliente eliminado como objeto JSON o un mensaje de error si no se encuentra.
+    1. **Operación GET /customers:** Busca clientes en la base de datos utilizando los parámetros de la QueryString. Devuelve un objeto JSON con los clientes encontrados o un mensaje de error si no se encuentran.
+    2. **Operación GET /customers/:id:** Busca un cliente en la base de datos utilizando su ID dinámicamente. Retorna un objeto JSON con el cliente encontrado o un mensaje de error si no se encuentra.
+    3. **Operación POST /customers:** Guarda un nuevo cliente en la base de datos. Espera recibir los datos del cliente en el cuerpo de la solicitud y devuelve el cliente guardado como objeto JSON, o un mensaje de error si ocurre algún problema.
+    4. **Operación PATCH /customers:** Actualiza clientes en la base de datos utilizando los parámetros de la QueryString como filtros. Devuelve el cliente actualizado como objeto JSON o un mensaje de error si no se encuentra.
+    5. **Operación PATCH /customers/:id:** Actualiza un cliente en la base de datos utilizando su ID dinámicamente. Retorna el cliente actualizado como objeto JSON o un mensaje de error si no se encuentra.
+    6. **Operación DELETE /customers:** Elimina clientes de la base de datos utilizando los parámetros de la QueryString como filtros. Devuelve el cliente eliminado como objeto JSON o un mensaje de error si no se encuentra.
+    7. **Operación DELETE /customers/:id:** Elimina un cliente de la base de datos utilizando su ID dinámicamente. Retorna el cliente eliminado como objeto JSON o un mensaje de error si no se encuentra.
 
     ```ts
     export const customersRouter = Express.Router();
@@ -526,13 +529,13 @@ En esta fase, se ha implementado el servidor utilizando Express para replicar la
 
   * **furnitures.ts**: Define operaciones CRUD (Crear, Leer, Actualizar, Eliminar) para la gestión de muebles en una API REST utilizando Express y Mongoose.
 
-    1. Operación GET /furnitures: Busca muebles en la base de datos utilizando los parámetros de la QueryString. Retorna un objeto JSON con los muebles encontrados o un mensaje de error si no se encuentran.
-    2. Operación GET /furnitures/:id: Busca un mueble en la base de datos utilizando su ID de manera dinámica. Devuelve un objeto JSON con el mueble encontrado o un mensaje de error si no se encuentra.
-    3. Operación POST /furnitures: Guarda un nuevo mueble en la base de datos. Espera recibir los datos del mueble en el cuerpo de la solicitud y devuelve el mueble guardado como objeto JSON, o un mensaje de error si ocurre algún problema.
-    4. Operación PATCH /furnitures: Actualiza muebles en la base de datos utilizando los parámetros de la QueryString como filtros. Devuelve el mueble actualizado como objeto JSON o un mensaje de error si no se encuentra.
-    5. Operación PATCH /furnitures/:id: Actualiza un mueble en la base de datos utilizando su ID de manera dinámica. Retorna el mueble actualizado como objeto JSON o un mensaje de error si no se encuentra.
-    6. Operación DELETE /furnitures: Elimina muebles de la base de datos utilizando los parámetros de la QueryString como filtros. Retorna el mueble eliminado como objeto JSON o un mensaje de error si no se encuentra.
-    7. Operación DELETE /furnitures/:id: Elimina un mueble de la base de datos utilizando su ID de manera dinámica. Retorna el mueble eliminado como objeto JSON o un mensaje de error si no se encuentra.
+    1. **Operación GET /furnitures:** Busca muebles en la base de datos utilizando los parámetros de la QueryString. Retorna un objeto JSON con los muebles encontrados o un mensaje de error si no se encuentran.
+    2. **Operación GET /furnitures/:id:** Busca un mueble en la base de datos utilizando su ID de manera dinámica. Devuelve un objeto JSON con el mueble encontrado o un mensaje de error si no se encuentra.
+    3. **Operación POST /furnitures:** Guarda un nuevo mueble en la base de datos. Espera recibir los datos del mueble en el cuerpo de la solicitud y devuelve el mueble guardado como objeto JSON, o un mensaje de error si ocurre algún problema.
+    4. **Operación PATCH /furnitures:** Actualiza muebles en la base de datos utilizando los parámetros de la QueryString como filtros. Devuelve el mueble actualizado como objeto JSON o un mensaje de error si no se encuentra.
+    5. **Operación PATCH /furnitures/:id:** Actualiza un mueble en la base de datos utilizando su ID de manera dinámica. Retorna el mueble actualizado como objeto JSON o un mensaje de error si no se encuentra.
+    6. **Operación DELETE /furnitures:** Elimina muebles de la base de datos utilizando los parámetros de la QueryString como filtros. Retorna el mueble eliminado como objeto JSON o un mensaje de error si no se encuentra.
+    7. **Operación DELETE /furnitures/:id:** Elimina un mueble de la base de datos utilizando su ID de manera dinámica. Retorna el mueble eliminado como objeto JSON o un mensaje de error si no se encuentra.
 
     ```ts
     import Express from 'express';
@@ -701,13 +704,13 @@ En esta fase, se ha implementado el servidor utilizando Express para replicar la
 
   * **providers.ts**: Define operaciones CRUD (Crear, Leer, Actualizar, Eliminar) para la gestión de proveedores en una API REST utilizando Express y Mongoose.
 
-    1. Operación GET /providers: Busca proveedores en la base de datos utilizando los parámetros de la QueryString. Retorna un objeto JSON con los proveedores encontrados o un mensaje de error si no se encuentran.
-    2. Operación GET /providers/:id: Busca un proveedor en la base de datos utilizando su ID de manera dinámica. Devuelve un objeto JSON con el proveedor encontrado o un mensaje de error si no se encuentra.
-    3. Operación POST /providers: Guarda un nuevo proveedor en la base de datos. Espera recibir los datos del proveedor en el cuerpo de la solicitud y devuelve el proveedor guardado como objeto JSON, o un mensaje de error si ocurre algún problema.
-    4. Operación PATCH /providers: Actualiza proveedores en la base de datos utilizando los parámetros de la QueryString como filtros. Devuelve el proveedor actualizado como objeto JSON o un mensaje de error si no se encuentra.
-    5. Operación PATCH /providers/:id: Actualiza un proveedor en la base de datos utilizando su ID de manera dinámica. Retorna el proveedor actualizado como objeto JSON o un mensaje de error si no se encuentra.
-    6. Operación DELETE /providers: Elimina proveedores de la base de datos utilizando los parámetros de la QueryString como filtros. Retorna el proveedor eliminado como objeto JSON o un mensaje de error si no se encuentra.
-    7. Operación DELETE /providers/:id: Elimina un proveedor de la base de datos utilizando su ID de manera dinámica. Retorna el proveedor eliminado como objeto JSON o un mensaje de error si no se encuentra.
+    1. **Operación GET /providers:** Busca proveedores en la base de datos utilizando los parámetros de la QueryString. Retorna un objeto JSON con los proveedores encontrados o un mensaje de error si no se encuentran.
+    2. **Operación GET /providers/:id:** Busca un proveedor en la base de datos utilizando su ID de manera dinámica. Devuelve un objeto JSON con el proveedor encontrado o un mensaje de error si no se encuentra.
+    3. **Operación POST /providers:** Guarda un nuevo proveedor en la base de datos. Espera recibir los datos del proveedor en el cuerpo de la solicitud y devuelve el proveedor guardado como objeto JSON, o un mensaje de error si ocurre algún problema.
+    4. **Operación PATCH /providers:** Actualiza proveedores en la base de datos utilizando los parámetros de la QueryString como filtros. Devuelve el proveedor actualizado como objeto JSON o un mensaje de error si no se encuentra.
+    5. **Operación PATCH /providers/:id:** Actualiza un proveedor en la base de datos utilizando su ID de manera dinámica. Retorna el proveedor actualizado como objeto JSON o un mensaje de error si no se encuentra.
+    6. **Operación DELETE /providers:** Elimina proveedores de la base de datos utilizando los parámetros de la QueryString como filtros. Retorna el proveedor eliminado como objeto JSON o un mensaje de error si no se encuentra.
+    7. **Operación DELETE /providers/:id:** Elimina un proveedor de la base de datos utilizando su ID de manera dinámica. Retorna el proveedor eliminado como objeto JSON o un mensaje de error si no se encuentra.
 
     ```ts
     export const providersRouter = Express.Router();
@@ -789,11 +792,11 @@ En esta fase, se ha implementado el servidor utilizando Express para replicar la
 
   * **transaction.ts**: Permiten realizar operaciones CRUD en una API REST utilizando Express y Mongoose.
 
-    1. Operación GET /transactions/balance: Esta ruta calcula el saldo total de todas las transacciones en la base de datos y devuelve el promedio del saldo de todas las transacciones.
-    2. Operaciones GET /transactions y GET /transactions/:id: Estas rutas permiten buscar transacciones por diferentes criterios. La función handleGet parece estar definida pero no se proporciona en el código. Puedes asumir que esta función maneja la lógica para buscar transacciones según los parámetros de la QueryString o el ID dinámico.
-    3. Operación POST /transactions: Esta ruta guarda una nueva transacción en la base de datos. Antes de guardar la transacción, se parsean y validan los datos recibidos en el cuerpo de la solicitud. Se espera que exista una función parseData que realice esta tarea. También se espera que exista una función getModel que obtenga el modelo correcto para la transacción en función del tipo de transacción especificado en el cuerpo de la solicitud.
-    4. Operación PATCH /transactions/:id: Esta ruta actualiza una transacción existente en la base de datos. Primero, se recupera la transacción anterior. Si se especifican muebles en el cuerpo de la solicitud, se actualizan los muebles asociados a la transacción y se realiza un control de inventario. Si no se especifican muebles, se actualiza directamente la transacción. Se espera que exista una función actualizarStock que maneje la lógica para actualizar el inventario de muebles.
-    5. Operación DELETE /transactions/:id: Esta ruta elimina una transacción existente de la base de datos. Se eliminan todas las instancias de transacciones asociadas al ID proporcionado. También se espera que exista una función actualizarStock que maneje la lógica para actualizar el inventario de muebles al eliminar una transacción.
+    1. **Operación GET /transactions/balance:** Esta ruta calcula el saldo total de todas las transacciones en la base de datos y devuelve el promedio del saldo de todas las transacciones.
+    2. **Operaciones GET /transactions y GET /transactions/:id:** Estas rutas permiten buscar transacciones por diferentes criterios. La función handleGet parece estar definida pero no se proporciona en el código. Puedes asumir que esta función maneja la lógica para buscar transacciones según los parámetros de la QueryString o el ID dinámico.
+    3. **Operación POST /transactions:** Esta ruta guarda una nueva transacción en la base de datos. Antes de guardar la transacción, se parsean y validan los datos recibidos en el cuerpo de la solicitud. Se espera que exista una función parseData que realice esta tarea. También se espera que exista una función getModel que obtenga el modelo correcto para la transacción en función del tipo de transacción especificado en el cuerpo de la solicitud.
+    4. **Operación PATCH /transactions/:id:** Esta ruta actualiza una transacción existente en la base de datos. Primero, se recupera la transacción anterior. Si se especifican muebles en el cuerpo de la solicitud, se actualizan los muebles asociados a la transacción y se realiza un control de inventario. Si no se especifican muebles, se actualiza directamente la transacción. Se espera que exista una función actualizarStock que maneje la lógica para actualizar el inventario de muebles.
+    5. **Operación DELETE /transactions/:id:** Esta ruta elimina una transacción existente de la base de datos. Se eliminan todas las instancias de transacciones asociadas al ID proporcionado. También se espera que exista una función actualizarStock que maneje la lógica para actualizar el inventario de muebles al eliminar una transacción.
    
     ```ts
     export const transaccionRouter = Express.Router();
@@ -919,9 +922,9 @@ En esta fase, se ha implementado el servidor utilizando Express para replicar la
 
   * **functionsHandle.ts**: Implementa algunas funciones como:
 
-    1. Operación GET: La función handleGet maneja las solicitudes GET a la ruta /transactions, tanto para buscar todas las transacciones como para buscar una transacción específica por ID.
-    2. Operación POST: La función parseData se encarga de analizar y validar los datos de la transacción antes de guardarla en la base de datos. Se manejan casos como la búsqueda de la persona asociada a la transacción y la actualización del stock de muebles.
-    3. Operación DELETE: La función actualizarStock se utiliza para actualizar el stock de muebles después de eliminar una transacción. Esto asegura que el inventario se mantenga actualizado correctamente.
+    1. **Operación GET:** La función handleGet maneja las solicitudes GET a la ruta /transactions, tanto para buscar todas las transacciones como para buscar una transacción específica por ID.
+    2. **Operación POST:** La función parseData se encarga de analizar y validar los datos de la transacción antes de guardarla en la base de datos. Se manejan casos como la búsqueda de la persona asociada a la transacción y la actualización del stock de muebles.
+    3. **Operación DELETE:** La función actualizarStock se utiliza para actualizar el stock de muebles después de eliminar una transacción. Esto asegura que el inventario se mantenga actualizado correctamente.
 
     ```ts
     type request = Express.Request<any>;
