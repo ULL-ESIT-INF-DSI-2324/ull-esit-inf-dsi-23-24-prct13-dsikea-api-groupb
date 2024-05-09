@@ -1,6 +1,4 @@
-- Autores: **Omar Suárez Doro - alu0101483474@ull.edu.es
-           Antonio Ramos Castilla - alu0101480367@ull.edu.es
-           Ithaisa Morales Arbelo - alu0101482194@ull.edu.es**
+- Autores: **Omar Suárez Doro - alu0101483474@ull.edu.es ; Antonio Ramos Castilla - alu0101480367@ull.edu.es ; Ithaisa Morales Arbelo - alu0101482194@ull.edu.es**
 
 - Asignatura: **Desarrollo de Sistemas Informáticos**
   
